@@ -5,35 +5,25 @@
  *  Author: TheXeno
  */ 
 #include "task.h"
-#include "hal/atmega328/timer_hal.h"
+#include "timer_hal.h"
+#include "interrupt_hal.h"
+#include "pin_hal.h"
 
-typedef struct {
-	int16_t intervalTick;
-	int16_t elapsed;
-	long lastTick;
-	void (*taskFunct)(void);
-	uint8_t state;
-} task_t;
 
-enum
-{
-	TASK_IDLE = 0U,
-	TASK_READY = 1U,
-	TASK_RUN = 2U,
-	TASK_QUEUE = 3U
-};
+
+
+
+
+
 /* Task */
+static task_tick_t task_systick_get(void);
+static void task_systick_increment_ISR(void);
 
-static void _task_SysTickIncr(void);
 
-static task_t tasks[TASK_MAX_SUPPORTED];
-
-static signed long taskSystemTick = 0;
-static signed long taskSystemTickDispatch = 0;
-static uint8_t taskTimeSlotCounter = 0;
-static uint8_t taskCreateLock = 0;
-
-static uint8_t taskNum = 0;
+static task_tick_t task_system_tick = 0;
+static task_tick_t task_system_tick_schedule = 0;
+static task_lock_t task_create_lock = TASK_LOCK_ENABLE; // so that withoput init, no task will be assigned
+static uint8_t task_num = 0;
 
 
 /**
@@ -46,51 +36,41 @@ static uint8_t taskNum = 0;
 	//return (&tasks);
 //}
 
-/**
- * @brief      Retrieve the effective number of the supported  tasks in the task array. Does not consider which task is creted or not, but only the maximum number of supported, at startup.
- *
- * @return     Number of total supported tasks.
- */
-uint8_t task_GetTaskNum(void)
-{
- 	uint8_t a = sizeof(tasks);
- 	uint8_t b = sizeof(*tasks);
- 	return a/b;
-}
+
 
 /**
  * @brief      Run the task in the array if it is ready for the execution.
  */
-void task_Dispatch(void) // tbd misura tempo fuori delle funzioni (task) chiamatiper capire IDLE
+void Task_idle(const task_conf_t* conf) // tbd misura tempo fuori delle funzioni (task) chiamatiper capire IDLE
                           // metti monitore anche prima di una ISR. l'esecuzione resetta IDLE timer, incrementa il proprio e al next idle timer start, si calcola la percentuale di CPU usata
 {
     uint8_t i = 0;
 	//base_t st = 0;
 	//Gpio_hal_set_value(0, 1);
 	
-	taskSystemTickDispatch = task_SysTickGet();
+	task_system_tick_schedule = task_systick_get();
     
-	for (i=0; i<taskNum; i++)
+	for (i=0; i<task_num; i++)
     {
-		if ((taskSystemTickDispatch - tasks[i].lastTick) >= 0)
+		if ((task_system_tick_schedule - tasks[i].last_tick) >= 0)
 		{ 
-			tasks[i].elapsed = (int16_t)(taskSystemTickDispatch - tasks[i].lastTick);
+			tasks[i].elapsed = (task_tick_t)(task_system_tick_schedule - tasks[i].last_tick);
 		}
-		else if ((taskSystemTickDispatch - tasks[i].lastTick) < 0)
+		else if ((task_system_tick_schedule - tasks[i].last_tick) < 0)
 		{
-			tasks[i].elapsed = (int16_t)((TASK_TICK_MAX-tasks[i].lastTick)+taskSystemTickDispatch);
+			tasks[i].elapsed = (task_tick_t)((conf->max_tick_no_wrap - tasks[i].last_tick)+task_system_tick_schedule);
 		}
 		else
 		{
 			;
 		}	
 		
-		if (tasks[i].elapsed >= tasks[i].intervalTick)
+		if (tasks[i].elapsed >= tasks[i].interval_tick)
 		{
 			tasks[i].state = TASK_RUN;
-			// All the instructions before the (*tasks[i].taskFunct)() will introduce jutter in the taske execution time. But sequentiality will be guranteed by reading taskSystemTickDispatch in the task_Dispatch()
-			(*tasks[i].taskFunct)();
-			tasks[i].lastTick = taskSystemTickDispatch;  // the last tick which the task was executed. Not having the real last one, the period if the scheduling will take into consideration the task execution time.
+			// All the instructions before the (*tasks[i].taskFunct)() will introduce jutter in the taske execution time. But sequentiality will be guranteed by reading task_system_tick_schedule in the task_Dispatch()
+			(*tasks[i].task_fp)();
+			tasks[i].last_tick = task_system_tick_schedule;  // the last tick which the task was executed. Not having the real last one, the period if the scheduling will take into consideration the task execution time.
 			tasks[i].state = TASK_IDLE;
 		}
 
@@ -102,17 +82,6 @@ void task_Dispatch(void) // tbd misura tempo fuori delle funzioni (task) chiamat
 /**
  * @brief      ISR scheduled at a CONF_SYS_TICK, usually in ms. The speed is decided at configuration time, when calling task_ScheduleInit()
  */
-
-void task_SchedulerISR(void)
-{
-
-	taskCreateLock = 1;
-	
-	//Pin_wr_pin(0x10, 1);
-	//Pin_wr_pin(0x10, 0);
-	//_task_SysTickIncr();
-	taskSystemTick++;
-}
 
 
 /**
@@ -127,21 +96,21 @@ void task_SchedulerISR(void)
  */
 
 //todo metti messaggi errore, non 1 e 0
-uint8_t task_Create(uint16_t p, void (*func)(void))
+task_lock_t Task_create(const task_conf_t* conf, task_tick_t p, void (*func_p)(void))
 {
-	if (taskCreateLock == 0 && taskNum < TASK_MAX_SUPPORTED)
+	if (task_create_lock == TASK_LOCK_DISABLE && task_num < conf->total_tasks)
 	{
-		tasks[taskNum].lastTick = 0;
-		tasks[taskNum].intervalTick = p; // ms
-		tasks[taskNum].taskFunct = func;
-		tasks[taskNum].state = TASK_IDLE;
-		taskNum++;
+		tasks[task_num].last_tick = 0;
+		tasks[task_num].interval_tick = p; // ms
+		tasks[task_num].task_fp = func_p;
+		tasks[task_num].state = TASK_IDLE;
+		task_num++;
 	}
 	else
 	{
-		taskCreateLock = 1;
+		task_create_lock = TASK_LOCK_ENABLE;
 	}
-	return taskCreateLock;	
+	return task_create_lock;	
 }
 
 /**
@@ -149,37 +118,33 @@ uint8_t task_Create(uint16_t p, void (*func)(void))
  *
  * @param[in]  st  the system tick, usually in ms
  */
-void task_ScheduleInit(const task_hal_base_tick_t* basetick)
+void Task_scheduler_init(const task_conf_t* conf)
 {
-	uint16_t comp = 0;
-	taskTimeSlotCounter = 0;
-	taskCreateLock = 0;
-	taskNum = 0;
-	taskSystemTick = 0;
-	comp = ((basetick->sys_cpu/1000 * basetick->tick)/64)-1;
-	//timer_hal_conf[TIMER_1].compare_value = comp;
-	Timer_hal_init_compare(&timer_hal_conf[TIMER_1]);
-	Timer_hal_set_compare(&timer_hal_conf[TIMER_1], comp);
-	Timer_hal_ISR_callback_set(task_SchedulerISR, TIMER_1);
+	timer_hal_comp_t comp = 0;
+	task_create_lock = TASK_LOCK_DISABLE;
+	task_num = 0;
+	task_system_tick = 0;
+	comp = ((conf->sys_clock/1000000UL * conf->tick_quanta)/conf->timer->prescaler)-1;
+	Timer_hal_init_compare(conf->timer);
+	Timer_hal_set_compare(conf->timer, comp);
+	Timer_hal_ISR_callback_set(conf->timer, (void*)task_systick_increment_ISR);
 }
 
 
 /**
  * @brief      Increment the software tick timer. This is called from within the task ISR.
  */
-static void _task_SysTickIncr(void)
+static void task_systick_increment_ISR(void)
 {
-	taskSystemTick++;
+	task_system_tick+=1000;
 }
 
-#warning "define se privata o pubblica"
-
-long task_SysTickGet(void)
+static task_tick_t task_systick_get(void)
 {
-	long ret = 0;
+	task_tick_t ret = 0;
 	base_t int_st = 0;
     int_st = IntHal_suspend_global_interrupt();
-	ret = taskSystemTick;
+	ret = task_system_tick;
 	IntHal_restore_global_interrupt(int_st);
 	return ret;
 }
@@ -189,9 +154,16 @@ long task_SysTickGet(void)
 /**
  * @brief      Start the scheduler with the initialized tasks
  */
-void task_Run(void)
+void Task_scheduler_start(const task_conf_t* conf)
 {
-	Timer_hal_start_timer(&timer_hal_conf[TIMER_1]);
+	task_create_lock = TASK_LOCK_ENABLE;
+	Timer_hal_write_timer(conf->timer, 0);
+	Timer_hal_start_timer(conf->timer);
+}
+
+void Task_scheduler_stop(const task_conf_t* conf)
+{
+	// tbd
 }
 
 /* EOF */

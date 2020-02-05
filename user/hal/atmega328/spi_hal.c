@@ -1,159 +1,162 @@
 #include "spi_hal.h"
+#include "pin_hal.h"
 #include "interrupt_hal.h"
 
+typedef void (*spi_hal_isr_cb)(spi_hal_ch_t );
+static void spi0_isr(void);
+spi_hal_isr_cb spiHal_ISR_cb[NUM_SPI_CHANNELS];
 
-
-uint8_t SpiHal_init_master(spi_hal_conf_bord_e data_order, spi_hal_conf_cpol_e clk_pol, spi_hal_conf_cpha_e clk_phase, long speed)
+register_t volatile * const spcr[NUM_SPI_CHANNELS] =
 {
-	uint8_t conf_var = 0x00;
-	uint8_t clk_div = 0;
+	(register_t*)&SPCR
+};
 
-    SPCR = ((1<< SPIE) | (1 << SPE) | (1 << MSTR));
-    switch (data_order)
+register_t volatile * const spsr[NUM_SPI_CHANNELS] =
+{
+	(register_t*)&SPSR
+};
+
+register_t volatile * const spdr[NUM_SPI_CHANNELS] =
+{
+	(register_t*)&SPDR
+};
+
+spi_hal_err_t SpiHal_init(const spi_hal_cfg_t* handle)
+{
+	base_t conf_var = 0x00;
+	base_t clk_div = 0;
+
+    *spcr[handle->channel] = ((1<< SPIE) | (1 << SPE));
+
+    switch (handle->endian)
     {
 		case SPI_HAL_MSB_FIRST:
-		SPCR &= ~(1 << DORD);
+		*spcr[handle->channel] &= ~(1 << DORD);
 		break;
 
 		case SPI_HAL_LSB_FIRST:
-		SPCR |= (1 << DORD);
+		*spcr[handle->channel] |= (1 << DORD);
 		default:
 		break;
     }
-	switch (clk_phase)
+
+	switch (handle->phase)
     {
       case SPI_HAL_SCK_LEAD_EDGE_SAMP:
-      SPCR &= ~(1 << CPHA);
+      *spcr[handle->channel] &= ~(1 << CPHA);
       break;
 
       case SPI_HAL_SCK_TRAIL_EDGE_SAMP:
-	  SPCR |= (1 << CPHA);
+	  *spcr[handle->channel] |= (1 << CPHA);
       default:
       break;
     }
-    switch (clk_pol)
+
+    switch (handle->polarity)
     {
       case SPI_HAL_SCK_LEAD_RISE:
-	  SPCR &= ~(1 << CPOL);
+	  *spcr[handle->channel] &= ~(1 << CPOL);
       break;
 
       case SPI_HAL_SCK_LEAD_FALL:
-	  SPCR |= (1 << CPOL);
+	  *spcr[handle->channel] |= (1 << CPOL);
       default:
       break;
     }
-	#warning "put cpu speed in a truct for the config"
-    clk_div = (uint8_t)(16000000UL/(speed));
-	if (clk_div == 0)
-			return -1;
 
-	if (clk_div <= 3)
-	{
-		SPSR |= (1 << SPI2X);
-		SPCR &= ~((1 << SPR1) | (1 << SPR0));
-	}
-    else if (clk_div <= 4)
-	{
-		SPSR &= ~(1 << SPI2X);
-		SPCR &= ~((1 << SPR1) | (1 << SPR0));
-	}
-    else if (clk_div <= 8)
+    if (handle->mode == SPI_MODE_MASTER)
     {
-		SPSR |= (1 << SPI2X);
-		SPCR &= ~(1 << SPR1);
-		SPCR |= (1 << SPR0);
-    }	
-    else if (clk_div <= 16)
-    {
-		SPSR &= ~(1 << SPI2X);
-		SPCR &= ~(1 << SPR1);
-		SPCR |= (1 << SPR0);	    
-    }
-	else if (clk_div <= 32)
-	{
-		SPSR |= (1 << SPI2X);
-		SPCR |= (SPR1);
-		SPCR &= ~(SPR0);
+    	if (Gpio_hal_set_mode(handle->pin_ss, GPIO_MODE_OUTPUT) != GPIO_OK)
+    	{
+    		return SPI_HAL_ERR;
+    	}
+    	else
+    	{
+    		Gpio_hal_set_value(handle->pin_ss, GPIO_HIGH);
+
+    		*spcr[handle->channel] |= (1 << MSTR);
+
+		    clk_div = (uint8_t)(handle->sys_clock/(handle->baudrate));
+
+			if (clk_div == 0)
+					return -1;
+
+			if (clk_div <= 3)
+			{
+				*spsr[handle->channel] |= (1 << SPI2X);
+				*spcr[handle->channel] &= ~((1 << SPR1) | (1 << SPR0));
+			}
+		    else if (clk_div <= 4)
+			{
+				*spsr[handle->channel] &= ~(1 << SPI2X);
+				*spcr[handle->channel] &= ~((1 << SPR1) | (1 << SPR0));
+			}
+		    else if (clk_div <= 8)
+		    {
+				*spsr[handle->channel] |= (1 << SPI2X);
+				*spcr[handle->channel] &= ~(1 << SPR1);
+				*spcr[handle->channel] |= (1 << SPR0);
+		    }	
+		    else if (clk_div <= 16)
+		    {
+				*spsr[handle->channel] &= ~(1 << SPI2X);
+				*spcr[handle->channel] &= ~(1 << SPR1);
+				*spcr[handle->channel] |= (1 << SPR0);	    
+		    }
+			else if (clk_div <= 32)
+			{
+				*spsr[handle->channel] |= (1 << SPI2X);
+				*spcr[handle->channel] |= (SPR1);
+				*spcr[handle->channel] &= ~(SPR0);
+			}
+		    else if (clk_div <= 64)
+		    {
+				*spsr[handle->channel] &= ~(1 << SPI2X);
+				*spcr[handle->channel] |= (SPR1);
+				*spcr[handle->channel] &= ~(SPR0);
+		    }
+			else
+			{
+				*spsr[handle->channel] &= ~(1 << SPI2X);
+				*spcr[handle->channel] |= (SPR1);
+				*spcr[handle->channel] |= ~(SPR0);
+			}
+    	}
 	}
-    else if (clk_div <= 64)
-    {
-		SPSR &= ~(1 << SPI2X);
-		SPCR |= (SPR1);
-		SPCR &= ~(SPR0);
-    }
-	else
-	{
-		SPSR &= ~(1 << SPI2X);
-		SPCR |= (SPR1);
-		SPCR |= ~(SPR0);
-	}
-	
-	//SPCR = conf_var;
+
+	IntHal_vector_register(spi0_isr, SPI_STC_vect_num);
 	return 0;
 }
 
-
-uint8_t SpiHal_init_slave(spi_hal_conf_bord_e data_order, spi_hal_conf_cpol_e clk_pol, spi_hal_conf_cpha_e clk_phase)
+static void spi0_isr()
 {
-	uint8_t conf_var = 0x00;
-
-
-	conf_var = ((1<< SPIE) | (1 << SPE)); 
-	switch (data_order)
-	{
-		case SPI_HAL_MSB_FIRST:
-		conf_var &= ~(1 << DORD);
-		break;
-
-		case SPI_HAL_LSB_FIRST:
-		conf_var |= (1 << DORD);
-		default:
-		break;
-	}
-	switch (clk_phase)
-	{
-		case SPI_HAL_SCK_LEAD_EDGE_SAMP:
-		conf_var &= ~(1 << CPHA);
-		break;
-
-		case SPI_HAL_SCK_TRAIL_EDGE_SAMP:
-		conf_var |= (1 << CPHA);
-		default:
-		break;
-	}
-	switch (clk_pol)
-	{
-		case SPI_HAL_SCK_LEAD_RISE:
-		conf_var &= ~(1 << CPOL);
-		break;
-
-		case SPI_HAL_SCK_LEAD_FALL:
-		conf_var |= (1 << CPOL);
-		default:
-		break;
-	}
-	
-	SPCR = conf_var;
-	return 0;
+	spiHal_ISR_cb[SPI_0](SPI_0); // callback a i.e. ser_rx_char_ISR(ser_dev_st* console)
 }
 
 
-void SpiHal_transmit(uint8_t TXData)
+void SpiHal_ISR_callback_set(void (*fp_t)(spi_hal_ch_t ), spi_hal_ch_t channel)
 {
-   SPDR = TXData;
+	spiHal_ISR_cb[channel] = fp_t; 
 }
 
-uint8_t SpiHal_read(void)
+void SpiHal_transmit(const spi_hal_cfg_t* handle, uint8_t TXData)
 {
-    return SPDR;
+   // nello slave va messo in isr
+   *spdr[handle->channel] = TXData;
 }
-//
-//uint8_t spiHal_getHwStat(uint8_t st)
-//{
-    //uint8_t ret = 0;
-    //if (st == SPI_TXFLAG_CHECK)
-    //{
-      ////ret = EUSCI_A_SPI_getInterruptStatus(EUSCI_A0_BASE, EUSCI_A_SPI_TRANSMIT_INTERRUPT);
-    //}
-    //return ret;
-//}
+
+uint8_t SpiHal_read(const spi_hal_cfg_t* handle)
+{
+    return *spdr[handle->channel];
+}
+
+void SpiHal_Start(const spi_hal_cfg_t* handle)
+{
+	Gpio_hal_set_value(handle->pin_ss, GPIO_LOW);
+}
+
+void SpiHal_Stop(const spi_hal_cfg_t* handle)
+{
+	Gpio_hal_set_value(handle->pin_ss, GPIO_HIGH);
+}
+

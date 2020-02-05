@@ -9,26 +9,26 @@
 #define GPIO_CHANNELS 3U
 
 // same order as port
-volatile address_t* ddr[GPIO_CHANNELS] =
+register_t volatile * const ddr[GPIO_CHANNELS] =
 {
-	&DDRB,
-	&DDRC,
-	&DDRD
+	(register_t*)&DDRB,
+	(register_t*)&DDRC,
+	(register_t*)&DDRD
 };
 
-volatile address_t* port[GPIO_CHANNELS] =
+register_t volatile * const port[GPIO_CHANNELS] =
 {
-	&PORTB,
-	&PORTC,
-	&PORTD
+	(register_t*)&PORTB,
+	(register_t*)&PORTC,
+	(register_t*)&PORTD
 };
 
 // same order as port
-volatile address_t* pin[GPIO_CHANNELS] =
+register_t volatile * const pin[GPIO_CHANNELS] =
 {
-	&PINB,
-	&PINC,
-	&PIND
+	(register_t*)&PINB,
+	(register_t*)&PINC,
+	(register_t*)&PIND
 };
 
 /*const base_t pins[GPIO_PIN_WIDE] =
@@ -45,6 +45,10 @@ base_t total_pins = 0;
 
 gpio_hal_err_t Gpio_hal_set_mode(base_t pin_enum, gpio_hal_mode_t mode_io)
 {
+	if (gpio_hal_cfg_buff[pin_enum].status != GPIO_OK)
+	{
+		return GPIO_ERR_PIN; 
+	}
 	if (pin_enum < total_pins)
 	{
 		if (mode_io == GPIO_MODE_OUTPUT)
@@ -111,7 +115,7 @@ void Gpio_hal_reset(void)
 	}
 }
 
-void Gpio_hal_init(const gpio_hal_cfg_t* handle, base_t sz)
+void Gpio_hal_init(gpio_hal_cfg_t* handle, base_t sz)
 {
 	uint8_t temp = 0;
 	uint8_t temp1 = 0;
@@ -152,6 +156,7 @@ void Gpio_hal_init(const gpio_hal_cfg_t* handle, base_t sz)
 			*ddr[temp] &= ~(temp1);
 			*port[temp] &= ~(temp1);
 		}
+		handle[i].status = GPIO_OK; 
 	}
 }
 

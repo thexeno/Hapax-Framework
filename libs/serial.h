@@ -2,7 +2,7 @@
 #define SERIAL_H_
 
 
-#include "hal/atmega328/uart_hal.h"
+#include "uart_hal.h"
 #include "utils/sys_types.h"
 #include "utils/ring_buffer.h"
 
@@ -26,7 +26,7 @@ typedef struct serial_device
 	rb_t serial_rx_buff;
 	//uint8_t tx_buff[]; // but the hal does not have any buffer
 	//uint8_t rx_buff[];
-	const uart_hal_cgf_t* config;
+	const uart_hal_cfg_t* config;
 } ser_dev_st;
 
 
@@ -34,7 +34,7 @@ typedef struct serial_device
 
 // configure tx and rx sizes here ?
 
-//int8_t Ser_init(ser_dev_st* console, uart_hal_cgf_t* config, uint8_t* txb, uint8_t* rxb);
+//int8_t Ser_init(ser_dev_st* console, uart_hal_cfg_t* config, uint8_t* txb, uint8_t* rxb);
 //void Ser_full_duplex_start(long baud);
 //void Ser_half_duplex_tx_start(long baud);
 //void Ser_trig_tx(ser_dev_st* console);
@@ -48,7 +48,7 @@ typedef struct serial_device
 
 //void Ser_set_console(ser_dev_st* console, uart_hal_channel_t channel);
 //void Ser_set_console_1(ser_dev_st* console);
-int8_t Ser_init(ser_dev_st* console, const uart_hal_cgf_t* config, uint8_t* txb, base_t tx_sz, uint8_t* rxb, base_t rx_sz);
+int8_t Ser_init(ser_dev_st* console, const uart_hal_cfg_t* config, uint8_t* txb, base_t tx_sz, uint8_t* rxb, base_t rx_sz);
 void Ser_trig_tx(ser_dev_st* console);
 void Ser_put_buff(ser_dev_st* console, const char* str);
 void Ser_put_integer(ser_dev_st* console, uint16_t c);

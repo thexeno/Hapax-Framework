@@ -1,48 +1,49 @@
 #include "spi.h"
-#include "utils/ring_buffer.h"
-#include "hal/atmega328/hal.h" // TI stuff included in hal.h
-#include "hal/atmega328/spi_hal.h"
-#include "hal/atmega328/interrupt_hal.h"
 
 #define  SPI_RB_SIZE 32U
+
+
+static void spi_byte_handler(spi_hal_ch_t channel);
+
+typedef struct spi_dev_buffered
+{
+	spi_dev_st* spi_dev_pt;
+} spi_dev_buffered_t;
+
+static spi_dev_buffered_t spi_dev_internal_pt[NUM_SPI_CHANNELS];
 
 static uint8_t tx_buff[SPI_RB_SIZE];
 static uint8_t rx_buff[SPI_RB_SIZE];
 
-static struct spi_parameters spi;
 static long baudrate = 0;
 
 static struct ring_buff spi_tx_buff;
 static struct ring_buff spi_rx_buff;
 
-void Spi_init(spi_mode_e mode, long speed)
+spi_status_t Spi_init(spi_dev_st* console, const spi_hal_cfg_t* config, uint8_t* txb, base_t tx_sz, uint8_t* rxb, base_t rx_sz)
 {
-    Rb_init(&spi_rx_buff, rx_buff);
-    Rb_init(&spi_tx_buff, tx_buff);
+  spi_status_t ret = SPI_OK;
+  console->config = config;
+  console->status = SPI_INIT_PEND;
 
-	spi.state = SPI_FREE;
-    spi.active_mode = mode;
-    IntHal_vector_register(spi_ISR, HAL_VECT_SPI_ID);
-    if (mode == SPI_MODE_MASTER)
-    {
-		Pin_mode(SPI_SS, PIN_OUTPUT, PULLUP_DISABLED);
-		Pin_wr_pin(SPI_SS, (!0));
-        SpiHal_init_master(
-                           SPI_HAL_MSB_FIRST, 
-                           SPI_HAL_SCK_LEAD_RISE, 
-                           SPI_HAL_SCK_LEAD_EDGE_SAMP, 
-                           speed
-                           );
-    }
-    else if (mode == SPI_MODE_SLAVE)
-    {
-		Pin_mode(SPI_SS, PIN_INPUT, PULLUP_ENABLED);
-        SpiHal_init_slave(
-                           SPI_HAL_MSB_FIRST, 
-                           SPI_HAL_SCK_LEAD_RISE, 
-                           SPI_HAL_SCK_LEAD_EDGE_SAMP
-                           );
-    }
+  spi_dev_internal_pt[config->channel].spi_dev_pt = console;
+
+  Rb_init(&console->spi_tx_buff, txb, (rb_sz_t)tx_sz);
+  Rb_init(&console->spi_rx_buff, rxb, (rb_sz_t)rx_sz);
+
+  SpiHal_ISR_callback_set(spi_byte_handler, console->config->channel);
+
+  if (SpiHal_init(console->config) != SPI_HAL_OK)
+  {
+    return SPI_INIT_PEND;
+  }
+  else
+  {
+    console->status = SPI_OK;
+    return SPI_OK;
+  }
+
+  return SPI_ERR;
 }
 
 
@@ -51,9 +52,14 @@ void Spi_init(spi_mode_e mode, long speed)
  *
  * @param[in]  str   The string pointer
  */
-void Spi_put_buff(const char* str)
+void Spi_put_buff(spi_dev_st* console, const char* str)
 {
-	Rb_put_buff(str, &spi_tx_buff, (rb_sz_t)SPI_RB_SIZE);
+	Rb_put_buff(str, &console->spi_tx_buff);
+}
+
+void Spi_put_char(spi_dev_st* console, char ch)
+{
+  Rb_put_char(&console->spi_tx_buff, ch);
 }
 
 /**
@@ -61,82 +67,64 @@ void Spi_put_buff(const char* str)
  *
  * @param[in]  c     integer
  */
-void Spi_put_integer(uint16_t c)
+void Spi_put_integer(spi_dev_st* console, uint16_t c)
 {
-	Rb_put_integer("%d", c, &spi_tx_buff, (rb_sz_t)SPI_RB_SIZE);
+  Rb_put_integer("%d", c, &console->spi_tx_buff);
 }
 
-
-uint8_t Spi_transfer(spi_mode_e mode)
+void Spi_slave_select(spi_dev_st* console)
 {
-    uint8_t dummy = 0x00;
-
-/**
- * Warn if SPI is not free, otherwise initialize accordingly to the mode
- */
-
-    if (spi.state != SPI_FREE)
-    {
-        return -1;
-    }
-    else if (spi.active_mode != mode)
-    {
-        return -2;
-    }
-    else if (spi.active_mode == SPI_MODE_MASTER)
-    {
-        Pin_wr_pin(SPI_SS, (0));
-        spi.state = SPI_MASTER_BUSY;
-    }
-    else
-    {
-        spi.state = SPI_SLAVE_BUSY;
-    }
-
-    if (!Rb_is_empty(&spi_tx_buff))
-    {
-        SpiHal_transmit((uint8_t)Rb_retrieve_char(&spi_tx_buff, (rb_sz_t)SPI_RB_SIZE));    
-    }
-    else
-    {
-        SpiHal_transmit(dummy);
-    }
-    
-
-    // switch (mode)
-    // {
-    //     case SPI_SEND:
-    //     SpiHal_transmit(Rb_retrieve_byte(&spi_tx_buff));
-    //     break;
-
-    //     case SPI_RECEIVE:
-    //     SpiHal_transmit(dummy);
-    //     break;
-
-    //     case SPI_SEND_RECEIVE:
-    //     SpiHal_transmit()
-    // }
-    // SpiHal_transmit(Rb_retrieve_byte(&spi_tx_buff));
-    // // wait for isrrx
+  SpiHal_Start(&console->config);
 }
 
-
-
-void spi_ISR(void)
+void Spi_slave_release(spi_dev_st* console)
 {
-  uint8_t c = 0;
-  /* Corect byte intepretation done at higher level software (SPI device specific) */
-  /* Get data shifted in */
-  Rb_put_char(&spi_rx_buff, SpiHal_read(), (rb_sz_t)SPI_RB_SIZE);
-  /* put data to shift if any */
-  if (!Rb_is_empty(&spi_tx_buff) && (Rb_used_size(&spi_tx_buff, (rb_sz_t)SPI_RB_SIZE)>=1))
+  SpiHal_Stop(&console->config);
+}
+
+uint8_t Spi_transfer(spi_dev_st* console, base_t rx_items)
+{
+  uint8_t buffer_size = 0;
+  console->rx_items = rx_items;
+  if (&console->config->mode == SPI_MODE_MASTER)
   {
-      SpiHal_transmit((uint8_t)Rb_retrieve_char(&spi_tx_buff, (rb_sz_t)SPI_RB_SIZE));
+    if ((Rb_used_size(&console->spi_tx_buff) > 0) || (console->rx_items > 0))
+    {
+      SpiHal_transmit(&console->config, Rb_retrieve_char(&console->spi_tx_buff));  
+    }
   }
-  else 
+}
+
+void spi_byte_handler(spi_hal_ch_t channel)
+{
+  spi_dev_st* console = spi_dev_internal_pt[channel].spi_dev_pt; // buffered for debug
+
+  if ((Rb_used_size(&console->spi_tx_buff) > 0) && (console->rx_items > 0))
   {
-      //Last data
-      spi.state = SPI_FREE;
+    // MASTER 
+    // there is data to send from buffer, keep doing it
+    // but also has to be received rx_items
+    Rb_put_char(&console->spi_rx_buff, SpiHal_read(&console->config));  // store what was shifted in
+    console->rx_items--;
+    SpiHal_transmit(&console->config, Rb_retrieve_char(&console->spi_tx_buff)); //keep transmit 
   }
-    
+  else if ((Rb_used_size(&console->spi_tx_buff) > 0) && (console->rx_items == 0))
+  {
+    // no more data to be received, more to be sent
+    SpiHal_transmit(&console->config, Rb_retrieve_char(&console->spi_tx_buff)); //keep transmit 
+  }
+  else if ((Rb_used_size(&console->spi_tx_buff) == 0) && (console->rx_items > 0))
+  {
+    // just receive
+    Rb_put_char(&console->spi_rx_buff, SpiHal_read(&console->config));  // store what was shifted in
+    console->rx_items--; // c'è il > 0 che scazza
+    if (console->rx_items > 0)
+    {
+      SpiHal_transmit(&console->config, 0x00); //keep receving with dummy
+    }
+  }
+  else
+  {
+    // stop
+  }
 }

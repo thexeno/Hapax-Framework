@@ -1,38 +1,24 @@
 #ifndef CONF_H_
 #define CONF_H_
 
-#include "hal/atmega328/hal.h"
-#include "hal/atmega328/pin_hal.h"
-#include "hal/atmega328/spi_hal.h"
-#include "hal/atmega328/uart_hal.h"
-#include "hal/atmega328/interrupt_hal.h"
-#include "hal/atmega328/timer_hal.h"
-
+#include "hal.h"
+#include "pin_hal.h"
+#include "spi_hal.h"
+#include "uart_hal.h"
+#include "interrupt_hal.h"
+#include "timer_hal.h"
+#include "utils/task.h"
 
 // CPU configs
 #define CONF_CPU_FREQ	 16000000UL
 
-// UART defines and config
-#define CONF_SERIAL_BAUD 9600U
-const uart_hal_cgf_t uart_hal_cfg[] =
-{
-	{UART_0, UART_HALF_DUPLEX_TX, 800000U, CONF_CPU_FREQ},
-	//{UART_0, UART_FULL_DUPLEX, CONF_SERIAL_BAUD, CONF_CPU_FREQ}
-};
-
 // Utils config
 typedef uint8_t rb_sz_t;
 
-/* Pin assignement LED*/
-//#define DEBUG_LED	(GPIO_B5)
-//#define DEBUG_LED_1	(PORT_B | PIN_3)
-//#define DEBUG_LED_2	(PORT_B | PIN_0)
 
-/* Pin assignement buttons */
-//#define MAIN_BUTTON (PORT_D | PIN_6)
-//#define MAIN_BUTTON_INIT_V 0x01
 
-enum 
+
+enum
 {
 	DEBUG_LED = 0,
 	DEBUG_LED_OC_T2A,
@@ -42,19 +28,48 @@ enum
 	SYNC_CLK_PIN,
 	CONF_TOTAL_APP_PIN
 };
-
-#define LCD_PARALLEL GPIO_PORT_B
-
-const gpio_hal_cfg_t gpio_hal_conf[CONF_TOTAL_APP_PIN] =
+gpio_hal_cfg_t gpio_hal_conf[CONF_TOTAL_APP_PIN] =
 {
-	{DEBUG_LED, GPIO_PORT_B, GPIO_PIN_5, GPIO_MODE_OUTPUT, GPIO_LOW},
-	{DEBUG_LED_OC_T2A, GPIO_PORT_B, GPIO_PIN_3, GPIO_MODE_OUTPUT, GPIO_LOW},
-	{MOSI_PIN, GPIO_PORT_B, GPIO_PIN_3, GPIO_MODE_OUTPUT, GPIO_LOW},
-	{DEBUG_LED_2_SS, GPIO_PORT_B, GPIO_PIN_2, GPIO_MODE_OUTPUT, GPIO_HIGH},
-	{DEBUG_LED_PWM_T0B, GPIO_PORT_D, GPIO_PIN_5, GPIO_MODE_OUTPUT, GPIO_HIGH},
-	{SYNC_CLK_PIN, GPIO_PORT_D, GPIO_PIN_4, GPIO_MODE_OUTPUT, GPIO_HIGH}
+	{DEBUG_LED,				 GPIO_PORT_B, 			GPIO_PIN_5,		GPIO_MODE_OUTPUT, 		GPIO_LOW,		GPIO_INIT_PEND},
+	{DEBUG_LED_OC_T2A,		 GPIO_PORT_B,			GPIO_PIN_3, 	GPIO_MODE_OUTPUT, 		GPIO_LOW,		GPIO_INIT_PEND},
+	{MOSI_PIN, 				 GPIO_PORT_B, 			GPIO_PIN_3, 	GPIO_MODE_OUTPUT, 		GPIO_LOW,		GPIO_INIT_PEND},
+	{DEBUG_LED_2_SS, 		 GPIO_PORT_B, 			GPIO_PIN_2, 	GPIO_MODE_OUTPUT, 		GPIO_HIGH,		GPIO_INIT_PEND},
+	{DEBUG_LED_PWM_T0B, 	 GPIO_PORT_D, 			GPIO_PIN_5, 	GPIO_MODE_OUTPUT, 		GPIO_HIGH,		GPIO_INIT_PEND},
+	{SYNC_CLK_PIN, 			 GPIO_PORT_D, 			GPIO_PIN_4, 	GPIO_MODE_OUTPUT, 		GPIO_HIGH,		GPIO_INIT_PEND}
 };
 
+
+// UART defines and config
+#define CONF_SERIAL_BAUD 9600U
+const uart_hal_cfg_t uart_hal_cfg[] =
+{
+	{UART_0, UART_HALF_DUPLEX_TX, 800000U, CONF_CPU_FREQ},
+	//{UART_0, UART_FULL_DUPLEX, CONF_SERIAL_BAUD, CONF_CPU_FREQ}
+};
+
+// SPI defines and config
+const spi_hal_cfg_t spi_hal_cfg[] =
+{
+	{SPI_0,	SPI_MODE_MASTER, SPI_HAL_MSB_FIRST, SPI_HAL_SCK_LEAD_EDGE_SAMP, SPI_HAL_SCK_LEAD_RISE, DEBUG_LED_2_SS, 100000U, CONF_CPU_FREQ},
+};
+
+
+
+const timer_hal_cfg_t timer_hal_conf[] =
+{
+	{TIMER_0, TIMER_HAL_FAST_PWM_CUSTOM,	TIMER_HAL_CLK_OSC, TIMER_HAL_INT_ON, TIMER_HAL_COMP_A_DISCONNECT, 0,	1,	TIMER_HAL_PWM_B,		TIMER_HAL_PWM_POL_NORMAL},
+	{TIMER_1, TIMER_HAL_COMPARE_MATCH,		TIMER_HAL_CLK_OSC, TIMER_HAL_INT_ON, TIMER_HAL_COMP_A_DISCONNECT, 0,	64,		TIMER_HAL_PWM_UNUSED,	TIMER_HAL_PWM_POL_UNUSED},
+	{TIMER_2, TIMER_HAL_NORMAL,				TIMER_HAL_CLK_OSC, TIMER_HAL_INT_ON, TIMER_HAL_COMP_A_DISCONNECT, 0,	64,		TIMER_HAL_PWM_UNUSED,	TIMER_HAL_PWM_POL_UNUSED}
+};
+
+
+
+#define CONF_TOTAL_TASK  12
+task_t 		tasks[CONF_TOTAL_TASK];
+const task_conf_t task_config =
+{
+	&timer_hal_conf[TIMER_1],	(task_tick_t)1000,	(task_tick_t)1000000,	CONF_TOTAL_TASK,	CONF_CPU_FREQ
+};
 
 
 

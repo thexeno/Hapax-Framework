@@ -11,23 +11,52 @@
 
 
 #include "sys_types.h"
-#include "hal/atmega328/task_hal.h"
-#include "hal/atmega328/interrupt_hal.h"
-#include "hal/atmega328/pin_hal.h"
+#include "timer_hal.h"
 
+typedef enum
+{
+	TASK_LOCK_ENABLE = 0U,
+	TASK_LOCK_DISABLE
+} task_lock_t;
 
-#define TASK_TICK_MAX 40000UL
-#define TASK_MAX_SUPPORTED 4U
+typedef int32_t task_tick_t;
 
+typedef enum
+{
+	TASK_IDLE = 0U,
+	TASK_READY,
+	TASK_RUN,
+	TASK_QUEUE
+} task_state_t;
 
-void task_Dispatch(void);
-uint8_t task_GetTaskNum(void);
-void task_SchedulerISR(void);
-uint8_t task_Create(uint16_t p, void (*func)(void));
-void task_ScheduleInit(const task_hal_base_tick_t* st);
-long task_SysTickGet(void);
-long task_SysTickToMs(void);
-void task_Run(void);
+typedef struct {
+	task_tick_t interval_tick;
+	task_tick_t elapsed;
+	task_tick_t last_tick;
+	void (*task_fp)(void);
+	task_state_t state;
+} task_t;
+
+extern task_t tasks[];
+
+typedef struct task_struct {
+
+	timer_hal_cfg_t* timer;
+	task_tick_t    tick_quanta;
+	task_tick_t    max_tick_no_wrap;
+	base_t	total_tasks;
+	long	sys_clock;
+} task_conf_t;
+
+extern const task_conf_t task_cfg;
+
+void Task_scheduler_start(const task_conf_t* conf);
+void Task_scheduler_stop(const task_conf_t* conf);
+void Task_scheduler_init(const task_conf_t* conf);
+task_lock_t Task_create(const task_conf_t* conf, task_tick_t p, void (*func_p)(void));
+void Task_idle(const task_conf_t* conf);
+uint8_t Task_get_total_task(void);
+
 
 /* fine task */
 

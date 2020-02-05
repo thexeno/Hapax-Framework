@@ -1,47 +1,33 @@
 #include "utils/sys_types.h"
-#include "hal/atmega328/pin_hal.h"
+#include "spi_hal.h"
+#include "pin_hal.h"
+#include "utils/ring_buffer.h"
 
 #define SPI_SS (PORT_B | PIN_2)
 
-typedef enum
+typedef enum spi_enumerations
 {
-    SPI_MODE_MASTER,
-    SPI_MODE_SLAVE
-} spi_mode_e;
+    SPI_OK = 0,
+    SPI_INIT_PEND,
+    SPI_OVERRUN,
+    SPI_ERR
+} spi_status_t;
 
-typedef enum
+//metti declar nel conf.h
+
+typedef struct spi_device
 {
-    SPI_TR_TRANSMIT,
-    SPI_TR_TRANSMIT_RECEIVE,
-    SPI_TR_RECEIVE,
-    SPI_TR_RECEIVE_TRANSMIT
-} spi_transact_e;
+    rb_t spi_tx_buff;
+    rb_t spi_rx_buff;
+    spi_status_t status;
+    base_t rx_items;
+    const spi_hal_cfg_t* config;
+} spi_dev_st;
 
-typedef enum
-{
-    SPI_DATA_LSB_F,
-    SPI_DATA_MSB_F,
-    SPI_SCK_POL_HIGH,
-	SPI_SCK_POL_LOW,
-    SPI_SCK_PHASE
-} spi_data_e;
-
-
-typedef enum
-{
-    SPI_FREE = 0,
-	SPI_MASTER_BUSY,
-	SPI_SLAVE_BUSY
-} spi_state_e;
-
-struct spi_parameters
-{
-    spi_state_e state;
-	spi_mode_e active_mode;
-};
-
-uint8_t Spi_transfer(spi_mode_e mode);
-void Spi_put_integer(uint16_t);
-void Spi_init(spi_mode_e mode, long speed);
-void spi_ISR(void);
-
+uint8_t Spi_transfer(spi_dev_st* console, base_t rx_items);
+void Spi_slave_release(spi_dev_st* console);
+void Spi_slave_select(spi_dev_st* console);
+void Ser_put_integer(spi_dev_st* console, uint16_t c);
+void Ser_put_char(spi_dev_st* console, char ch);
+void Spi_put_buff(spi_dev_st* console, const char* str);
+spi_status_t Spi_init(spi_dev_st* console, const spi_hal_cfg_t* config, uint8_t* txb, base_t tx_sz, uint8_t* rxb, base_t rx_sz);

@@ -29,17 +29,17 @@ typedef struct
 	long	baudrate;
 	long	sys_clock;
 	// combina i pin su pin_hal
-} uart_hal_cgf_t;
+} uart_hal_cfg_t;
 
 
 //nel conf.h
-extern const uart_hal_cgf_t uart_hal_cfg[];
+extern const uart_hal_cfg_t uart_hal_cfg[];
 
  
 
-uint8_t UartHal_get_byte(const uart_hal_cgf_t* handle);
-void UartHal_put_byte(const uart_hal_cgf_t* handle, uint8_t d);
-void UartHal_init(const uart_hal_cgf_t* handle, uint8_t special);
+uint8_t UartHal_get_byte(const uart_hal_cfg_t* handle);
+void UartHal_put_byte(const uart_hal_cfg_t* handle, uint8_t d);
+void UartHal_init(const uart_hal_cfg_t* handle);
 void UartHal_ISR_RX_callback_set(void (*fp_t)(uart_hal_ch_t ), uart_hal_ch_t channel);
 void UartHal_ISR_TX_callback_set(void (*fp_t)(uart_hal_ch_t ), uart_hal_ch_t channel);
 

@@ -11,41 +11,41 @@ uart_hal_isr_cb uartHal_ISR_TX_cb[NUM_UART_CHANNELS];
 
 
 #warning "inverti con volatile"
-volatile address_t* ucsra[NUM_UART_CHANNELS] =
+register_t volatile * const ucsra[NUM_UART_CHANNELS] =
 {
 	//(*(volatile uint8_t *)(mem_addr))
-	&UCSR0A
+	(register_t*)&UCSR0A
 	//(address_t*)&UCSR1A
 	//(*(volatile uint8_t *)(mem_addr))
 };
-volatile address_t* ucsrb[NUM_UART_CHANNELS] =
+register_t volatile * const ucsrb[NUM_UART_CHANNELS] =
 {
-	&UCSR0B
+	(register_t*)&UCSR0B
 //	(address_t*)&UCSR1B
 };
 
-volatile address_t* ucsrc[NUM_UART_CHANNELS] =
+register_t volatile * const ucsrc[NUM_UART_CHANNELS] =
 {
-	(address_t*)&UCSR0C,
+	(register_t*)&UCSR0C,
 //	(address_t*)&UCSR1C
 };
 
 //address_t volatile * const ubrrl[NUM_UART_CHANNELS] =
-volatile address_t* ubrrl[NUM_UART_CHANNELS] =
+register_t volatile * const ubrrl[NUM_UART_CHANNELS] =
 {
-	(address_t*)&UBRR0L,
+	(register_t*)&UBRR0L,
 //	(address_t*)&UBRR1L
 };
 
-volatile address_t* ubrrh[NUM_UART_CHANNELS] =
+register_t volatile * const ubrrh[NUM_UART_CHANNELS] =
 {
-	(address_t*)&UBRR0H,
+	(register_t*)&UBRR0H,
 //	(address_t*)&UBRR1H
 };
 
-volatile address_t*  udr[NUM_UART_CHANNELS] =
+register_t volatile * const udr[NUM_UART_CHANNELS] =
 {
-	(address_t*)&UDR0,
+	(register_t*)&UDR0,
 //	(address_t*)&UDR1
 };
 
@@ -176,17 +176,17 @@ static void uart_interrupt_disable(uart_hal_ch_t ch, uart_hal_int_t mode)
 
 
 
-uint8_t UartHal_get_byte(const uart_hal_cgf_t* handle)
+uint8_t UartHal_get_byte(const uart_hal_cfg_t* handle)
 {
 	return *udr[handle->channel];
 }
 
-void UartHal_put_byte(const uart_hal_cgf_t* handle, uint8_t d)
+void UartHal_put_byte(const uart_hal_cfg_t* handle, uint8_t d)
 {
 	*udr[handle->channel] = d;
 }
 
-void UartHal_init(const uart_hal_cgf_t* handle, uint8_t special)
+void UartHal_init(const uart_hal_cfg_t* handle)
 {
 	uint16_t baud_reg = 0;
 
@@ -194,23 +194,12 @@ void UartHal_init(const uart_hal_cgf_t* handle, uint8_t special)
 	*ucsrb[handle->channel] = 0;
 	*ucsrc[handle->channel] = 0;
 
-	if (!special)
-	{
 	baud_reg = (uint16_t)(handle->sys_clock/(16 * handle->baudrate))-1;
 
 	*ubrrl[handle->channel] = (uint8_t)baud_reg;
 	*ubrrh[handle->channel] = (uint8_t)(baud_reg >> 8);
 	*ucsrc[handle->channel] |= (UART_HAL_ASYNC | UART_HAL_NO_PARITY | UART_HAL_STOP_BIT1 | UART_HAL_DATA_8BIT);	
-	}
-	else
-	{
-			*ubrrl[handle->channel] = (uint8_t)2;
-			*ubrrh[handle->channel] = (uint8_t)0;
-			*ucsrc[handle->channel] |= (1 << UMSEL00);
-	}
-	
-	
-	
+
 	switch (handle->mode) {
 		case UART_HALF_DUPLEX_TX:
 		*ucsrb[handle->channel] |= (1<< TXEN0);

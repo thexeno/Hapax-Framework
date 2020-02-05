@@ -18,55 +18,55 @@ timer_hal_isr_cb timer_hal_ISR_cb[NUM_TIMER_CHANNELS];
 base_t silicon_bug_glitch_zero_active_A[NUM_TIMER_CHANNELS];
 base_t silicon_bug_glitch_zero_active_B[NUM_TIMER_CHANNELS];
 
-volatile address_t* tccra[NUM_TIMER_CHANNELS] =
+register_t volatile * const tccra[NUM_TIMER_CHANNELS] =
 {
-	&TCCR0A,
-	&TCCR1A,
-	&TCCR2A
+	(register_t*)&TCCR0A,
+	(register_t*)&TCCR1A,
+	(register_t*)&TCCR2A
 };
 
-volatile address_t* tccrb[NUM_TIMER_CHANNELS] =
+register_t volatile * const tccrb[NUM_TIMER_CHANNELS] =
 {
 
-	&TCCR0B,
-	&TCCR1B,
-	&TCCR2B
+	(register_t*)&TCCR0B,
+	(register_t*)&TCCR1B,
+	(register_t*)&TCCR2B
 };
 
-volatile address_t* timsk[NUM_TIMER_CHANNELS] =
+register_t volatile * const timsk[NUM_TIMER_CHANNELS] =
 {
 
-	&TIMSK0,
-	&TIMSK1,
-	&TIMSK2
+	(register_t*)&TIMSK0,
+	(register_t*)&TIMSK1,
+	(register_t*)&TIMSK2
 };
 
-volatile address_t* ocra[NUM_TIMER_CHANNELS] = 
+register_t volatile * const ocra[NUM_TIMER_CHANNELS] = 
 {
-	&OCR0A,
-	&OCR1A,
-	&OCR2A
+	(register_t*)&OCR0A,
+	(register_t*)&OCR1A,
+	(register_t*)&OCR2A
 };
 
-volatile address_t* ocrb[NUM_TIMER_CHANNELS] = 
+register_t volatile * const ocrb[NUM_TIMER_CHANNELS] = 
 {
-	&OCR0B,
-	&OCR1B,
-	&OCR2B
+	(register_t*)&OCR0B,
+	(register_t*)&OCR1B,
+	(register_t*)&OCR2B
 };
 
-volatile address_t* tcnt[NUM_TIMER_CHANNELS] =
+register_t volatile * const tcnt[NUM_TIMER_CHANNELS] =
 {
-	&TCNT0,
-	&TCNT1,
-	&TCNT2
+	(register_t*)&TCNT0,
+	(register_t*)&TCNT1,
+	(register_t*)&TCNT2
 };
 
-volatile address_t* tifr[NUM_TIMER_CHANNELS] = 
+register_t volatile * const tifr[NUM_TIMER_CHANNELS] = 
 {
-	&TIFR0,
-	&TIFR1,
-	&TIFR2
+	(register_t*)&TIFR0,
+	(register_t*)&TIFR1,
+	(register_t*)&TIFR2				
 };
 
 /* Private variables and prototypes*/
@@ -109,36 +109,75 @@ static void timer_hal_init(const timer_hal_cfg_t* handle)
 	silicon_bug_glitch_zero_active_A[handle->channel] = 0;
 	silicon_bug_glitch_zero_active_B[handle->channel] = 0;
 
-	switch (handle->mode)
+	if (handle->channel == TIMER_1)
 	{
-		case TIMER_HAL_NORMAL:
-			// keep 0 
-		break;
+		/* It does not include many options of the T1 */
+		switch (handle->mode)
+		{
+			case TIMER_HAL_NORMAL:
+				// keep 0 
+			break;
 
-		case TIMER_HAL_PWM:
-			*tccra[handle->channel] |= (1<<WGM00);
-		break;
+			case TIMER_HAL_PWM:
+				*tccra[handle->channel] |= (1<<WGM00);
+			break;
 
-		case TIMER_HAL_COMPARE_MATCH:
-			*tccra[handle->channel] |= (1<<WGM01);
+			case TIMER_HAL_COMPARE_MATCH:
+				*tccrb[handle->channel] |= (1<<WGM02);
 
-		break;
+			break;
 
-		case TIMER_HAL_FAST_PWM_FIXED:
-			*tccra[handle->channel] |= (1<<WGM00);
-			*tccra[handle->channel] |= (1<<WGM01);
-		break;
+			case TIMER_HAL_FAST_PWM_FIXED:
+				*tccra[handle->channel] |= (1<<WGM00);
+				*tccrb[handle->channel] |= (1<<WGM02);
+			break;
 
-		case TIMER_HAL_FAST_PWM_CUSTOM:
-			*tccra[handle->channel] |= (1<<WGM00);
-			*tccra[handle->channel] |= (1<<WGM01);
-			*tccrb[handle->channel] |= (1<<WGM02);
-		break;
+			case TIMER_HAL_FAST_PWM_CUSTOM:
+				*tccra[handle->channel] |= (1<<WGM00);
+				*tccra[handle->channel] |= (1<<WGM01);
+				*tccrb[handle->channel] |= (1<<WGM02);
+				*tccrb[handle->channel] |= (1<<WGM13);
+			break;
 
-		default:
-			// keep 0 
-		break;
-	}	
+			default:
+				// keep 0 
+			break;			
+		}		
+	}
+	else
+	{
+		switch (handle->mode)
+		{
+			case TIMER_HAL_NORMAL:
+				// keep 0 
+			break;
+
+			case TIMER_HAL_PWM:
+				*tccra[handle->channel] |= (1<<WGM00);
+			break;
+
+			case TIMER_HAL_COMPARE_MATCH:
+				*tccra[handle->channel] |= (1<<WGM01);
+
+			break;
+
+			case TIMER_HAL_FAST_PWM_FIXED:
+				*tccra[handle->channel] |= (1<<WGM00);
+				*tccra[handle->channel] |= (1<<WGM01);
+			break;
+
+			case TIMER_HAL_FAST_PWM_CUSTOM:
+				*tccra[handle->channel] |= (1<<WGM00);
+				*tccra[handle->channel] |= (1<<WGM01);
+				*tccrb[handle->channel] |= (1<<WGM02);
+			break;
+
+			default:
+				// keep 0 
+			break;
+		}			
+	}
+
 
 	// keep timer off
 	*tccrb[handle->channel] &= ~((1 << CS00) | (1 << CS01) | (1 << CS02));

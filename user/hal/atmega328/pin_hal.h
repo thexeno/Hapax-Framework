@@ -46,6 +46,7 @@ typedef enum
 typedef enum
 {
 	GPIO_OK = 0,
+	GPIO_INIT_PEND,
 	GPIO_ERR_PIN,
 	GPIO_ERR_PORT
 } gpio_hal_err_t;
@@ -57,12 +58,13 @@ typedef struct
 	gpio_hal_pin_t pin;
 	gpio_hal_mode_t mode_io;
 	gpio_hal_val_t	val;
+	gpio_hal_err_t status;
 } gpio_hal_cfg_t;
 //#define GPIO_TOTAL_CONF 
 
-extern const gpio_hal_cfg_t gpio_hal_conf[];
+extern gpio_hal_cfg_t gpio_hal_conf[];
 
-void Gpio_hal_init(const gpio_hal_cfg_t* handle, base_t sz);
+void Gpio_hal_init(gpio_hal_cfg_t* handle, base_t sz);
 gpio_hal_err_t Gpio_hal_set_mode(base_t pin_enum, gpio_hal_mode_t mode_io);
 gpio_hal_err_t Gpio_hal_set_value(base_t pin_enum, gpio_hal_val_t val);
 base_t Gpio_hal_get_value(base_t pin_enum, gpio_hal_val_t val);

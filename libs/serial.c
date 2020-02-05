@@ -1,5 +1,5 @@
 #include "serial.h"
-#include "hal/atmega328/uart_hal.h"
+#include "uart_hal.h"
 
 #warning "do the DMX version che si basa su UART"
 
@@ -34,7 +34,7 @@ static void ser_tx_byte_handler(uart_hal_ch_t channel);
 /**
  * @brief      Initialize the serial library
  */
-int8_t Ser_init(ser_dev_st* console, const uart_hal_cgf_t* config, uint8_t* txb, base_t tx_sz, uint8_t* rxb, base_t rx_sz)
+int8_t Ser_init(ser_dev_st* console, const uart_hal_cfg_t* config, uint8_t* txb, base_t tx_sz, uint8_t* rxb, base_t rx_sz)
 {
 
 	console->config = config;
