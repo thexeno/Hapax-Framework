@@ -44,22 +44,43 @@ register_t volatile * const timsk[NUM_TIMER_CHANNELS] =
 register_t volatile * const ocra[NUM_TIMER_CHANNELS] = 
 {
 	(register_t*)&OCR0A,
-	(register_t*)&OCR1A,
+	(register_t*)&OCR1AL,
 	(register_t*)&OCR2A
+};
+
+register_t volatile * const ocrah[NUM_TIMER_CHANNELS] = 
+{
+	(register_t*)NULL,
+	(register_t*)&OCR1AH,
+	(register_t*)NULL
 };
 
 register_t volatile * const ocrb[NUM_TIMER_CHANNELS] = 
 {
 	(register_t*)&OCR0B,
-	(register_t*)&OCR1B,
+	(register_t*)&OCR1BL,
 	(register_t*)&OCR2B
+};
+
+register_t volatile * const ocrbh[NUM_TIMER_CHANNELS] =
+{
+	(register_t*)NULL,
+	(register_t*)&OCR1BH,
+	(register_t*)NULL
 };
 
 register_t volatile * const tcnt[NUM_TIMER_CHANNELS] =
 {
 	(register_t*)&TCNT0,
-	(register_t*)&TCNT1,
+	(register_t*)&TCNT1L,
 	(register_t*)&TCNT2
+};
+
+register_t volatile * const tcnth[NUM_TIMER_CHANNELS] =
+{
+	(register_t*)NULL,
+	(register_t*)&TCNT1H,
+	(register_t*)NULL
 };
 
 register_t volatile * const tifr[NUM_TIMER_CHANNELS] = 
@@ -70,7 +91,7 @@ register_t volatile * const tifr[NUM_TIMER_CHANNELS] =
 };
 
 /* Private variables and prototypes*/
-static uint16_t timer_presc[NUM_TIMER_CHANNELS]; /* parti spento */
+
 
 static void timer2_isr()
 {
@@ -282,52 +303,68 @@ void Timer_hal_init_compare(const timer_hal_cfg_t* handle)
 			*tccra[handle->channel] |= (1 << COM0A0);
 			*tccra[handle->channel] &= ~(1 << COM0A1);
 			/* Externally, the DD6 should be set */
-			*ocra[handle->channel] = handle->compare_value;
+			if (ocrah[handle->channel] != NULL)
+				*ocrah[handle->channel] = handle->compare_value >> 8;
+			*ocra[handle->channel] = handle->compare_value & 0xff;
 		break;
 
 		case TIMER_HAL_COMP_A_CLEAR:
 			*tccra[handle->channel] &= ~(1 << COM0A0);
 			*tccra[handle->channel] |= (1 << COM0A1);
 			/* Externally, the DD6 should be set */
-			*ocra[handle->channel] = handle->compare_value;
+			if (ocrah[handle->channel] != NULL)
+				*ocrah[handle->channel] = handle->compare_value >> 8;
+			*ocra[handle->channel] = handle->compare_value & 0xff;
 		break;
 
 		case TIMER_HAL_COMP_A_SET:
 			*tccra[handle->channel] |= ((1 << COM0A0) | (1 << COM0A1));
 			/* Externally, the DD6 should be set */
-			*ocra[handle->channel] = handle->compare_value;
+			if (ocrah[handle->channel] != NULL)
+				*ocrah[handle->channel] = handle->compare_value >> 8;
+			*ocra[handle->channel] = handle->compare_value & 0xff;
 		break;
 
 		case TIMER_HAL_COMP_B_TOGGLE:
 			*tccra[handle->channel] |= (1 << COM0B0);
 			*tccra[handle->channel] &= ~(1 << COM0B1);
 			/* Externally, the DD5 should be set */
-			*ocrb[handle->channel] = handle->compare_value;
+			if (ocrbh[handle->channel] != NULL)
+				*ocrbh[handle->channel] = handle->compare_value >> 8;
+			*ocrb[handle->channel] = handle->compare_value & 0xff;
 		break;
 
 		case TIMER_HAL_COMP_B_CLEAR:
 			*tccra[handle->channel] &= ~(1 << COM0B0);
 			*tccra[handle->channel] |= (1 << COM0B1);
 			/* Externally, the DD5 should be set */
-			*ocrb[handle->channel] = handle->compare_value;
+			if (ocrbh[handle->channel] != NULL)
+				*ocrbh[handle->channel] = handle->compare_value >> 8;
+			*ocrb[handle->channel] = handle->compare_value & 0xff;
 		break;
 
 		case TIMER_HAL_COMP_B_SET:
 			*tccra[handle->channel] |= ((1 << COM0B0) | (1 << COM0B1));
 			/* Externally, the DD5 should be set */
-			*ocrb[handle->channel] = handle->compare_value;
+			if (ocrbh[handle->channel] != NULL)
+				*ocrbh[handle->channel] = handle->compare_value >> 8;
+			*ocrb[handle->channel] = handle->compare_value & 0xff;
 		break;
 
 		case TIMER_HAL_COMP_A_DISCONNECT:
 			*tccra[handle->channel] &= ~((1 << COM0A0) | (1 << COM0A1));
 			/* Externally, the DD5 should be clear */
-			*ocra[handle->channel] = handle->compare_value;
+			if (ocrah[handle->channel] != NULL)
+				*ocrah[handle->channel] = handle->compare_value >> 8;
+			*ocra[handle->channel] = handle->compare_value & 0xff;
 		break;
 
 		case TIMER_HAL_COMP_B_DISCONNECT:
 			*tccra[handle->channel] &= ~((1 << COM0B0) | (1 << COM0B1));
 			/* Externally, the DD5 should be clear */
-			*ocrb[handle->channel] = handle->compare_value;
+			if (ocrbh[handle->channel] != NULL)
+				*ocrbh[handle->channel] = handle->compare_value >> 8;
+			*ocrb[handle->channel] = handle->compare_value & 0xff;
 		break;
 
 		default:
@@ -387,13 +424,19 @@ void Timer_hal_init_compare(const timer_hal_cfg_t* handle)
 
 void Timer_hal_set_compare(const timer_hal_cfg_t* handle, timer_hal_comp_t comp)
 {
+	timer_hal_comp_t tmp = (comp >> 8);
 	if ((handle->compare_mode == TIMER_HAL_COMP_A_CLEAR)  ||
 	(handle->compare_mode == TIMER_HAL_COMP_A_SET)    ||
 	(handle->compare_mode == TIMER_HAL_COMP_A_TOGGLE) ||
 	(handle->compare_mode == TIMER_HAL_COMP_A_CLEAR)  ||
 	(handle->compare_mode == TIMER_HAL_COMP_A_DISCONNECT))
 	{
-		*ocra[handle->channel] = comp;
+//		OCR1AH = (comp >> 8);
+//		OCR1AL = comp & 0xff;
+		if (ocrah[handle->channel] != NULL)
+			*ocrah[handle->channel] = comp >> 8;
+		*ocra[handle->channel] =  comp & 0xff;
+		//OCR1A  = comp;
 	}
 	
 	if ((handle->compare_mode == TIMER_HAL_COMP_B_CLEAR)  ||
@@ -402,14 +445,18 @@ void Timer_hal_set_compare(const timer_hal_cfg_t* handle, timer_hal_comp_t comp)
 	(handle->compare_mode == TIMER_HAL_COMP_B_CLEAR)  ||
 	(handle->compare_mode == TIMER_HAL_COMP_B_DISCONNECT))
 	{
-		*ocra[handle->channel] = comp;
+		if (ocrbh[handle->channel] != NULL)
+			*ocrbh[handle->channel] = comp >> 8;
+		*ocrb[handle->channel] = comp & 0xff;
 	}
 }
 
 void Timer_hal_write_timer(const timer_hal_cfg_t* handle, uint16_t val)
 {
 	// take care when using 8 bit values
-	*tcnt[handle->channel] = val;
+	if (tcnth[handle->channel] != NULL)
+		*tcnth[handle->channel] = val >> 8;
+	*tcnt[handle->channel] = val & 0xff;
 }
 
 void Timer_hal_start_timer(const timer_hal_cfg_t* handle)
@@ -523,6 +570,8 @@ void Timer_hal_init_PWM(const timer_hal_cfg_t* handle)
 				case TIMER_HAL_PWM_POL_NORMAL:
 					*tccra[handle->channel] &= ~(1 << COM0A0);
 					*tccra[handle->channel] |= (1 << COM0A1);
+					if (ocrah[handle->channel] != NULL)
+						*ocrah[handle->channel] = 0;					
 					*ocra[handle->channel] = 0;
 					// remember the bug:
 					//pwmPol0A = pol;
@@ -531,6 +580,8 @@ void Timer_hal_init_PWM(const timer_hal_cfg_t* handle)
 				case TIMER_HAL_PWM_POL_INVERT:
 					*tccra[handle->channel] |= (1 << COM0A1);
 					*tccra[handle->channel] |= (1 << COM0A0);
+					if (ocrah[handle->channel] != NULL)
+						*ocrah[handle->channel] = 0xff;
 					*ocra[handle->channel] = 0xff;
 				break;
 
@@ -546,7 +597,9 @@ void Timer_hal_init_PWM(const timer_hal_cfg_t* handle)
 				case TIMER_HAL_PWM_POL_NORMAL:
 					*tccra[handle->channel] &= ~(1 << COM0B0);
 					*tccra[handle->channel] |= (1 << COM0B1);
-					*ocra[handle->channel] = 0;
+					if (ocrbh[handle->channel] != NULL)
+						*ocrbh[handle->channel] = 0;					
+					*ocrb[handle->channel] = 0;
 					// remember the bug:
 					//pwmPol0A = pol;
 				break;
@@ -554,6 +607,8 @@ void Timer_hal_init_PWM(const timer_hal_cfg_t* handle)
 				case TIMER_HAL_PWM_POL_INVERT:
 					*tccra[handle->channel] |= (1 << COM0B1);
 					*tccra[handle->channel] |= (1 << COM0B0);
+					if (ocrbh[handle->channel] != NULL)
+						*ocrbh[handle->channel] = 0xff;					
 					*ocrb[handle->channel] = 0xff;
 				break;
 
@@ -573,22 +628,28 @@ void Timer_hal_init_PWM(const timer_hal_cfg_t* handle)
 
 }
 
-void Timer_hal_PWM_period(const timer_hal_cfg_t* handle, base_t dc)
+void Timer_hal_PWM_period(const timer_hal_cfg_t* handle, timer_hal_comp_t per)
 {
 	if (handle->mode == TIMER_HAL_FAST_PWM_CUSTOM)
 	{
-		*ocra[handle->channel] = dc;
+		if (ocrah[handle->channel] != NULL)
+			*ocrah[handle->channel] = per >> 8;	
+		*ocra[handle->channel] = per & 0xff;
 	}
 }
 
-void Timer_hal_PWM_DC_direct_B(timer_hal_ch_t ch, base_t dc)
+void Timer_hal_PWM_DC_direct_B(timer_hal_ch_t ch, timer_hal_comp_t dc)
 {
-	*ocrb[ch] = dc;
+	if (ocrbh[ch] != NULL)
+		*ocrbh[ch] = dc >> 8;
+	*ocrb[ch] = dc & 0xff;
 }
 
-void Timer_hal_PWM_DC_direct_A(timer_hal_ch_t ch, base_t dc)
+void Timer_hal_PWM_DC_direct_A(timer_hal_ch_t ch, timer_hal_comp_t dc)
 {
-	*ocra[ch] = dc;
+	if (ocrah[ch] != NULL)
+		*ocrah[ch] = dc >> 8;
+	*ocra[ch] = dc & 0xff;
 }
 
 void Timer_hal_clear_pwm_interrupt(const timer_hal_cfg_t* handle)
@@ -597,7 +658,7 @@ void Timer_hal_clear_pwm_interrupt(const timer_hal_cfg_t* handle)
 }
 
 
-void Timer_hal_PWM_DC(const timer_hal_cfg_t* handle, timer_hal_pwm_ch_t ch, base_t dc)
+void Timer_hal_PWM_DC(const timer_hal_cfg_t* handle, timer_hal_pwm_ch_t ch, timer_hal_comp_t dc)
 {
 	switch(ch)
 	{
@@ -607,7 +668,9 @@ void Timer_hal_PWM_DC(const timer_hal_cfg_t* handle, timer_hal_pwm_ch_t ch, base
 				// put invert and set max DC, meaning 0%
 				*tccra[handle->channel] |= (1 << COM0A1);
 				*tccra[handle->channel] |= (1 << COM0A0);
-				*ocra[handle->channel] = 0xffff;
+				if (ocrah[handle->channel] != NULL)
+					*ocrah[handle->channel] = 0xff;
+				*ocra[handle->channel] = 0xff;
 				silicon_bug_glitch_zero_active_A[handle->channel] = 1;
 			}
 			else if (handle->pwm_polarity == TIMER_HAL_PWM_POL_INVERT && dc == 0)
@@ -615,7 +678,9 @@ void Timer_hal_PWM_DC(const timer_hal_cfg_t* handle, timer_hal_pwm_ch_t ch, base
 				// put normal and set max DC, meaning 100%
 				*tccra[handle->channel] &= ~(1 << COM0A0);
 				*tccra[handle->channel] |= (1 << COM0A1);
-				*ocra[handle->channel] = 0xffff;
+				if (ocrah[handle->channel] != NULL)
+					*ocrah[handle->channel] = 0xff;
+				*ocra[handle->channel] = 0xff;
 				silicon_bug_glitch_zero_active_A[handle->channel] = 1;
 			}
 			else
@@ -635,7 +700,9 @@ void Timer_hal_PWM_DC(const timer_hal_cfg_t* handle, timer_hal_pwm_ch_t ch, base
 					}
 					silicon_bug_glitch_zero_active_A[handle->channel] = 0;
 				}
-				*ocra[handle->channel] = dc;	
+				if (ocrah[handle->channel] != NULL)
+					*ocrah[handle->channel] = dc >> 8;					
+				*ocra[handle->channel] = dc & 0xff;	
 			}
 			
 		break;
@@ -646,7 +713,9 @@ void Timer_hal_PWM_DC(const timer_hal_cfg_t* handle, timer_hal_pwm_ch_t ch, base
 				// put invert and set max DC, meaning 0%
 				*tccra[handle->channel] |= (1 << COM0B1);
 				*tccra[handle->channel] |= (1 << COM0B0);
-				*ocrb[handle->channel] = 0xffff;
+				if (ocrbh[handle->channel] != NULL)
+					*ocrbh[handle->channel] = 0xff;
+				*ocrb[handle->channel] = 0xff;
 				silicon_bug_glitch_zero_active_B[handle->channel] = 1;
 			}
 			else if (handle->pwm_polarity == TIMER_HAL_PWM_POL_INVERT && dc == 0)
@@ -654,7 +723,9 @@ void Timer_hal_PWM_DC(const timer_hal_cfg_t* handle, timer_hal_pwm_ch_t ch, base
 				// put normal and set max DC, meaning 100%
 				*tccra[handle->channel] &= ~(1 << COM0B0);
 				*tccra[handle->channel] |= (1 << COM0B1);
-				*ocrb[handle->channel] = 0xffff;
+				if (ocrbh[handle->channel] != NULL)
+					*ocrbh[handle->channel] = 0xff;
+				*ocrb[handle->channel] = 0xff;
 				silicon_bug_glitch_zero_active_B[handle->channel] = 1;
 			}
 			else
@@ -674,7 +745,9 @@ void Timer_hal_PWM_DC(const timer_hal_cfg_t* handle, timer_hal_pwm_ch_t ch, base
 					}
 					silicon_bug_glitch_zero_active_B[handle->channel] = 0;
 				}
-				*ocrb[handle->channel] = dc;	
+				if (ocrah[handle->channel] != NULL)
+					*ocrah[handle->channel] = dc >> 8;
+				*ocra[handle->channel] = dc & 0xff;
 			}
 		break;
 

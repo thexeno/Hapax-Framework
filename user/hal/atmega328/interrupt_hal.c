@@ -4,32 +4,37 @@
 #define INTERRUPT_MAX_SUPPORTED_ISR 26U
 typedef void (*isr_pt_t)(void);
 
+
+typedef enum {
+	INTERRUPT_ASSIGNED,
+	INTERRUPT_UNASSIGNED,
+	INTERRUPT_DEFAULT
+} int_hal_state_t;
+
 struct isr_array
 {
 	isr_pt_t isr_pt;
-	uint8_t state;
+	int_hal_state_t state;
 };
 
 struct isr_array isr_pt_array[INTERRUPT_MAX_SUPPORTED_ISR];
 
+static void IntHal_default_ISR(void)
+{
+	asm("nop");
+	while(1);
+}
 
-enum {
-	INTERRUPT_ASSIGNED,
-	INTERRUPT_UNASSIGNED,
-	INTERRUPT_DEFAULT
-};
 
-static void IntHal_default_ISR(void);
-
-uint8_t IntHal_suspend_global_interrupt(void)
+base_t IntHal_suspend_global_interrupt(void)
 {
 	//__disable_interrupt();
-	uint8_t oldSREG = SREG;
+	base_t oldSREG = SREG;
 	cli();
 	return oldSREG;
 }
 
-void IntHal_restore_global_interrupt(uint8_t status)
+void IntHal_restore_global_interrupt(base_t status)
 {
 	//__enable_interrupt();
 	SREG = status;
@@ -50,7 +55,7 @@ void IntHal_vector_init(void)
 	MCUCR = temp|(1<<IVCE);
 	/* Move interrupts to 0x0002 */
 	MCUCR = temp & (~(1<<IVSEL));
-
+	cli();
 	for (temp=0; temp<INTERRUPT_MAX_SUPPORTED_ISR; temp++)
 	{
 		isr_pt_array[temp].isr_pt = &IntHal_default_ISR;
@@ -72,16 +77,16 @@ void IntHal_vector_register(void (*f_pt)(void), uint8_t irq_i)
 	}
 }
 
-
-static void IntHal_default_ISR(void)
+void IntHal_vector_unregister(uint8_t irq_i)
 {
-	asm("nop");
-	while(1);
+	isr_pt_array[irq_i].isr_pt = &IntHal_default_ISR;
+	isr_pt_array[irq_i].state = INTERRUPT_UNASSIGNED;         
 }
+
+
 
 ISR(TIMER1_COMPA_vect)
 {
-//	task();
 	isr_pt_array[TIMER1_COMPA_vect_num].isr_pt();
 }
 
@@ -91,11 +96,13 @@ ISR(TIMER1_COMPB_vect)
 	isr_pt_array[TIMER1_COMPB_vect_num].isr_pt();
 }
 
+
 ISR(USART_RX_vect)
 {
 //	task();
 	isr_pt_array[USART_RX_vect_num].isr_pt();
 }
+
 
 ISR(USART_UDRE_vect)
 {
@@ -132,7 +139,9 @@ ISR(PCINT2_vect)
 
 ISR(SPI_STC_vect)
 {
+	PORTD |= (1 << 5);
 	isr_pt_array[SPI_STC_vect_num].isr_pt();
+	PORTD &= ~(1 << 5);	
 }
 
 ISR(INT0_vect)
