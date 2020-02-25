@@ -165,7 +165,7 @@ spi_status_t Spi_rx_blocking(spi_dev_st* console, uint8_t* buffer, base_t items)
 			console->items = items;
 			while (console->items > 0 && time_delta > 0)
 			{
-				while (!SpiHal_transfer_done(console->config))
+				while (!SpiHal_transfer_done(console->config) && time_delta > 0)
 				{
 					time_delta--;
 				}
