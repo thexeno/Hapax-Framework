@@ -3,6 +3,7 @@
 
 
 #include "hal.h"
+#include "pin_hal.h"
 #include "utils/sys_types.h"
 
 
@@ -56,10 +57,14 @@ typedef struct
 	spi_hal_clk_pha_t phase;
 	spi_hal_clk_pol_t polarity;
 	base_t pin_ss;
+	base_t pin_mosi;
+	base_t pin_miso;
+	base_t pin_sck;
 	long	baudrate;
 	long	sys_clock;
 } spi_hal_cfg_t;
 
+extern register_t volatile * const spdr[NUM_SPI_CHANNELS];
 
 spi_hal_err_t SpiHal_init(const spi_hal_cfg_t* handle);
 void SpiHal_ISR_callback_set(void (*fp_t)(spi_hal_ch_t ), spi_hal_ch_t channel);
@@ -67,6 +72,11 @@ void SpiHal_transmit(const spi_hal_cfg_t* handle, uint8_t TXData);
 uint8_t SpiHal_read(const spi_hal_cfg_t* handle);
 void SpiHal_Start(const spi_hal_cfg_t* handle);
 void SpiHal_Stop(const spi_hal_cfg_t* handle);
-
+gpio_hal_val_t SpiHal_ss_pin(const spi_hal_cfg_t* handle);
+base_t SpiHal_transfer_done(const spi_hal_cfg_t* handle);
+void SpiHal_interrupt_disable(const spi_hal_cfg_t* handle);
+void SpiHal_interrupt_enable(const spi_hal_cfg_t* handle);
+void SpiHal_Clear(const spi_hal_cfg_t* handle);
+void SpiHal_ISR_callback_reset(spi_hal_ch_t channel);
 
 #endif

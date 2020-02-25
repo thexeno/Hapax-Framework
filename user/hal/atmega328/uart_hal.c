@@ -89,7 +89,7 @@ static void uart0_tx_isr()
 
 static void uart0_tx_done_isr()
 {
-	
+	asm("nop");
 }
 
 static void uart1_rx_isr()
@@ -198,7 +198,6 @@ void UartHal_init(const uart_hal_cfg_t* handle)
 
 	*ubrrl[handle->channel] = (uint8_t)baud_reg;
 	*ubrrh[handle->channel] = (uint8_t)(baud_reg >> 8);
-	*ucsrc[handle->channel] |= (UART_HAL_ASYNC | UART_HAL_NO_PARITY | UART_HAL_STOP_BIT1 | UART_HAL_DATA_8BIT);	
 
 	switch (handle->mode) {
 		case UART_HALF_DUPLEX_TX:
@@ -217,6 +216,8 @@ void UartHal_init(const uart_hal_cfg_t* handle)
 		
 		case UART_FULL_DUPLEX:
 		*ucsrb[handle->channel] |= ((1<< TXEN0) | (1<<RXEN0));
+		#warning "why? you should be able to remove it, check"
+		*ucsra[handle->channel] |= (1 << TXC0); // Bug fix. Cleared. Otherwise will trigger an initial interrupt. WHY?
 		uart_interrupt_enable(handle->channel, UART_HAL_INT_RX_BUFF_FULL);
 		uart_interrupt_enable(handle->channel, UART_HAL_INT_TX_DONE);
 		//uart_interrupt_enable(handle->channel, UART_HAL_INT_TX_BUFF_EMPTY);
@@ -227,6 +228,9 @@ void UartHal_init(const uart_hal_cfg_t* handle)
 	}
 	
 	uart_interrupt_disable(handle->channel, UART_HAL_INT_TX_BUFF_EMPTY);
+	*ucsrc[handle->channel] |= (UART_HAL_ASYNC | UART_HAL_NO_PARITY | UART_HAL_STOP_BIT1 | UART_HAL_DATA_8BIT);	
+	//*ucsra[handle->channel] |= (1 << TXC0); // Bug fix. Cleared. Otherwise will trigger an initial interrupt.
+	
 	
 	// CB to the HW interrupt
 	IntHal_vector_register(uart0_rx_isr, USART_RX_vect_num);

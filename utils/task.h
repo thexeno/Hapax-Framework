@@ -41,12 +41,13 @@ extern task_t tasks[];
 
 typedef struct task_struct {
 
-	timer_hal_cfg_t* timer;
+	const timer_hal_cfg_t* timer;
 	task_tick_t    tick_quanta;
 	task_tick_t    max_tick_no_wrap;
 	base_t	total_tasks;
 	long	sys_clock;
 } task_conf_t;
+
 
 extern const task_conf_t task_cfg;
 
@@ -56,7 +57,7 @@ void Task_scheduler_init(const task_conf_t* conf);
 task_lock_t Task_create(const task_conf_t* conf, task_tick_t p, void (*func_p)(void));
 void Task_idle(const task_conf_t* conf);
 uint8_t Task_get_total_task(void);
-
+task_tick_t Task_systick_get(void);
 
 /* fine task */
 

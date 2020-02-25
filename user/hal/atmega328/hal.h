@@ -10,7 +10,7 @@
 
 typedef uint8_t cpu_dw_t;
 typedef uint8_t base_t;
-typedef uint16_t register_t;
+typedef uint8_t register_t;
 
 /* The interrupt vector array wrapper index - Insert as many enumerations as the interrupt supported by the hardware for safely handle them later */
 enum {

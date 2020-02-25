@@ -88,10 +88,10 @@ void Timer_hal_stop_timer(const timer_hal_cfg_t* handle);
 void Timer_hal_init_PWM(const timer_hal_cfg_t* handle);
 void Timer_hal_PWM_DC(const timer_hal_cfg_t* handle, 
 							timer_hal_pwm_ch_t ch, 
-							base_t dc);
-void Timer_hal_PWM_period(const timer_hal_cfg_t* handle, base_t dc);
-void Timer_hal_PWM_DC_direct_B(timer_hal_ch_t ch, base_t dc);
-void Timer_hal_PWM_DC_direct_A(timer_hal_ch_t ch, base_t dc);
+							timer_hal_comp_t dc);
+void Timer_hal_PWM_period(const timer_hal_cfg_t* handle, timer_hal_comp_t dc);
+void Timer_hal_PWM_DC_direct_B(timer_hal_ch_t ch, timer_hal_comp_t dc);
+void Timer_hal_PWM_DC_direct_A(timer_hal_ch_t ch, timer_hal_comp_t dc);
 void Timer_hal_clear_pwm_interrupt(const timer_hal_cfg_t* handle);
 
 void Timer_hal_ISR_callback_set(const timer_hal_cfg_t* handle, void (*fp_t)(timer_hal_ch_t ));

@@ -31,9 +31,9 @@ bool  Rb_is_empty (rb_t *_this)
 	}
 }
 
-uint8_t  Rb_used_size (rb_t *_this)
+rb_sz_t  Rb_used_size (rb_t *_this)
 {
-	uint8_t ret = 0;
+	rb_sz_t ret = 0;
 	if (_this->full)
 	{
 	    ret = _this->size;  // avoid this line, not sure if is useless. test
@@ -41,6 +41,21 @@ uint8_t  Rb_used_size (rb_t *_this)
 	else
 	{
 	    ret = (*_this).head - (*_this).tail;
+	}
+
+	return ret;
+}
+
+rb_sz_t  Rb_available_size (rb_t *_this)
+{
+	rb_sz_t ret = 0;
+	if (_this->full)
+	{
+	    ret = 0;  // avoid this line, not sure if is useless. test
+	}
+	else
+	{
+	    ret = (_this->size - (_this->head - _this->tail));
 	}
 
 	return ret;

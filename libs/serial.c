@@ -1,5 +1,6 @@
 #include "serial.h"
 #include "uart_hal.h"
+#include "interrupt_hal.h"
 
 #warning "do the DMX version che si basa su UART"
 
@@ -34,9 +35,9 @@ static void ser_tx_byte_handler(uart_hal_ch_t channel);
 /**
  * @brief      Initialize the serial library
  */
-int8_t Ser_init(ser_dev_st* console, const uart_hal_cfg_t* config, uint8_t* txb, base_t tx_sz, uint8_t* rxb, base_t rx_sz)
+ser_status_t Ser_init(ser_dev_st* console, const uart_hal_cfg_t* config, uint8_t* txb, base_t tx_sz, uint8_t* rxb, base_t rx_sz)
 {
-
+	console->status = SER_INIT_PEND;
 	console->config = config;
 	// With this code the ISR handler seen from the application can have a parameter.
 	// Given the source of the ISR, the parameter will change and will be used as index
@@ -50,8 +51,9 @@ int8_t Ser_init(ser_dev_st* console, const uart_hal_cfg_t* config, uint8_t* txb,
 	UartHal_ISR_TX_callback_set(ser_tx_byte_handler, console->config->channel);
 
 	UartHal_init(console->config);
-
-	return 0;
+	
+	console->status = SER_OK;
+	return (console->status);
 }
 
 
@@ -64,16 +66,62 @@ int8_t Ser_init(ser_dev_st* console, const uart_hal_cfg_t* config, uint8_t* txb,
  ***********************************************************/
 
 
+ser_status_t Ser_get_status(ser_dev_st* console)
+{
+	return console->status;
+}
 
+// ser_status_t Ser_take_semaphore(ser_dev_st* console)
+// {
+// 	base_t int_status = IntHal_suspend_global_interrupt();
+// 	if (console->status == SER_OK)
+// 	{
+// 		console->status = SER_BUSY;
+// 		IntHal_restore_global_interrupt(int_status);
+// 		return SER_OK;
+// 	}
+// 	else
+// 	{
+// 		IntHal_restore_global_interrupt(int_status);
+// 		return console->status;
+// 	}
+// }
 
+// ser_status_t Ser_release_semaphore(ser_dev_st* console)
+// {
+// 	base_t int_status = IntHal_suspend_global_interrupt();
+// 	if (console->status == SER_SEMAPHORE_BUSY)
+// 	{
+// 		console->status = SER_OK;
+// 	}
+	
+// 	IntHal_restore_global_interrupt(int_status);
+// 	return SER_OK;
+// }
 
 /**
  * @brief      Trigger the transmission if ISR are used. If riong buffer is empty, do nothing.
  */
-void Ser_trig_tx(ser_dev_st* console)
+ser_status_t Ser_trig_tx(ser_dev_st* console)
 {
+	base_t int_status = IntHal_suspend_global_interrupt();
+	ser_status_t ret = SER_TX_BUSY;
 	if (!Rb_is_empty(&console->serial_tx_buff))
-		UartHal_put_byte(console->config, Rb_retrieve_char(&console->serial_tx_buff));
+	{
+		// If there is something to send
+		if (console->status == SER_OK)
+		{
+			console->status = SER_TX_BUSY;
+			UartHal_put_byte(console->config, Rb_retrieve_char(&console->serial_tx_buff));
+			ret = SER_OK;
+		}
+		else
+		{
+			ret = SER_TX_BUSY;
+		}
+	}
+	IntHal_restore_global_interrupt(int_status);
+	return ret;
 }
  
 
@@ -108,11 +156,11 @@ void Ser_put_integer(ser_dev_st* console, uint16_t c)
  *
  * @return     Size of free space.
  */
-uint8_t Ser_tx_buffer_space_av(ser_dev_st* console)
+rb_sz_t Ser_tx_buffer_space_av(ser_dev_st* console)
 {
-	uint16_t available_size = 0;
-	available_size = SER_RB_SIZE - (uint16_t)Rb_used_size(&console->serial_tx_buff);
-	return available_size;
+	rb_sz_t available_size = 0;
+	available_size = (console->serial_tx_buff.size) - Rb_used_size(&console->serial_tx_buff);
+	return available_size; 
 }
 
 
@@ -132,10 +180,10 @@ uint8_t Ser_tx_buffer_space_av(ser_dev_st* console)
  *
  * @return     Size of free space
  */
-uint8_t Ser_rx_buffer_space_av(ser_dev_st* console)
+rb_sz_t Ser_rx_buffer_space_av(ser_dev_st* console)
 {
-	uint16_t available_size = 0;
-	available_size = SER_RB_SIZE - (uint16_t)Rb_used_size(&console->serial_rx_buff);
+	rb_sz_t available_size = 0;
+	available_size = (console->serial_rx_buff.size) - Rb_used_size(&console->serial_rx_buff);
 	return available_size;
 }
 
@@ -172,9 +220,7 @@ uint8_t Ser_tx_buffer_elem(ser_dev_st* console)
 
 uint8_t Ser_get_char(ser_dev_st* console)
 {
-	uint8_t ret = 0;
-	ret = Rb_retrieve_char(&console->serial_rx_buff);
-	return ret;
+	return Rb_retrieve_char(&console->serial_rx_buff);
 }
 
 
@@ -196,7 +242,6 @@ static void ser_rx_byte_handler(uart_hal_ch_t channel)
 	{
 		/* Discard the byte */
 		(void)UartHal_get_byte(console->config);
-		#warning "todo: XOFF/XON"
 	}
 }
 
@@ -204,23 +249,15 @@ static void ser_rx_byte_handler(uart_hal_ch_t channel)
 
 static void ser_tx_byte_handler(uart_hal_ch_t channel)
 {
-	#warning "todo: XOFF/XON"
-	const char dummy = 0x00;
 	ser_dev_st* console = ser_dev_internal_pt[channels_to_serial[channel]].ser_dev_pt;
 	/* put data in tx buffer */
-	if (!Rb_is_empty(&console->serial_tx_buff) && (Rb_used_size(&console->serial_tx_buff)>=1))
+	if (Rb_used_size(&console->serial_tx_buff)>=1)
 	{
 		UartHal_put_byte(console->config, Rb_retrieve_char(&console->serial_tx_buff));
 	}
-	//else if (Rb_used_size(&console->serial_tx_buff) <= 1)
-	//{
-		//Last data
-		//UartHal_put_byte(console->config, Rb_retrieve_char(&console->serial_tx_buff));
-	//}
 	else
 	{
-		// to stop interrupt on certain patforms. like Atmega. Check compatiblity
-		//UartHal_put_byte(console->config, dummy);
+		console->status = SER_OK;
 	}
 }
 

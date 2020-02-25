@@ -13,14 +13,13 @@
 
 
 
-
+static task_tick_t task_system_tick = 0;
 
 /* Task */
-static task_tick_t task_systick_get(void);
 static void task_systick_increment_ISR(void);
 
 
-static task_tick_t task_system_tick = 0;
+
 static task_tick_t task_system_tick_schedule = 0;
 static task_lock_t task_create_lock = TASK_LOCK_ENABLE; // so that withoput init, no task will be assigned
 static uint8_t task_num = 0;
@@ -48,7 +47,7 @@ void Task_idle(const task_conf_t* conf) // tbd misura tempo fuori delle funzioni
 	//base_t st = 0;
 	//Gpio_hal_set_value(0, 1);
 	
-	task_system_tick_schedule = task_systick_get();
+	task_system_tick_schedule = Task_systick_get();
     
 	for (i=0; i<task_num; i++)
     {
@@ -134,19 +133,9 @@ void Task_scheduler_init(const task_conf_t* conf)
 /**
  * @brief      Increment the software tick timer. This is called from within the task ISR.
  */
-static void task_systick_increment_ISR(void)
+void task_systick_increment_ISR(void)
 {
 	task_system_tick+=1000;
-}
-
-static task_tick_t task_systick_get(void)
-{
-	task_tick_t ret = 0;
-	base_t int_st = 0;
-    int_st = IntHal_suspend_global_interrupt();
-	ret = task_system_tick;
-	IntHal_restore_global_interrupt(int_st);
-	return ret;
 }
 
 
@@ -157,7 +146,7 @@ static task_tick_t task_systick_get(void)
 void Task_scheduler_start(const task_conf_t* conf)
 {
 	task_create_lock = TASK_LOCK_ENABLE;
-	Timer_hal_write_timer(conf->timer, 0);
+	Timer_hal_write_timer(conf->timer, 258);
 	Timer_hal_start_timer(conf->timer);
 }
 
@@ -165,5 +154,16 @@ void Task_scheduler_stop(const task_conf_t* conf)
 {
 	// tbd
 }
+
+task_tick_t Task_systick_get(void)
+{
+	task_tick_t ret = 0;
+	base_t int_st = 0;
+    int_st = IntHal_suspend_global_interrupt();
+	ret = task_system_tick;
+	IntHal_restore_global_interrupt(int_st);
+	return ret;
+}
+
 
 /* EOF */

@@ -66,8 +66,8 @@ extern gpio_hal_cfg_t gpio_hal_conf[];
 
 void Gpio_hal_init(gpio_hal_cfg_t* handle, base_t sz);
 gpio_hal_err_t Gpio_hal_set_mode(base_t pin_enum, gpio_hal_mode_t mode_io);
+gpio_hal_val_t Gpio_hal_get_value(base_t pin_enum);
 gpio_hal_err_t Gpio_hal_set_value(base_t pin_enum, gpio_hal_val_t val);
-base_t Gpio_hal_get_value(base_t pin_enum, gpio_hal_val_t val);
 gpio_hal_err_t Gpio_hal_parallel_set_val(gpio_hal_port_t port_id, base_t val);
 void Gpio_hal_reset(void);
 

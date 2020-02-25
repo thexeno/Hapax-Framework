@@ -81,7 +81,7 @@ gpio_hal_err_t Gpio_hal_set_value(base_t pin_enum, gpio_hal_val_t val)
 	return GPIO_ERR_PIN;
 }
 
-base_t Gpio_hal_get_value(base_t pin_enum, gpio_hal_val_t val)
+gpio_hal_val_t Gpio_hal_get_value(base_t pin_enum)
 {
 	base_t ret = 0;
 	if (pin_enum < total_pins)
