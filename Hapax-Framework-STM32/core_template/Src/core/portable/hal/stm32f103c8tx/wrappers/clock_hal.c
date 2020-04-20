@@ -1,6 +1,4 @@
 #include <wrappers/clock_hal.h>
-#include <wrappers/hal.h>
-
 
 
 clk_hal_err_t Clock_hal_init(void)

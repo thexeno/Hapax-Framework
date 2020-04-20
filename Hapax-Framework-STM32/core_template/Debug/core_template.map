@@ -5270,7 +5270,6 @@ Discarded input sections
  .debug_macro   0x0000000000000000      0x241 Src/main.o
  .debug_macro   0x0000000000000000      0x141 Src/main.o
  .debug_macro   0x0000000000000000       0x83 Src/main.o
- .debug_macro   0x0000000000000000       0x10 Src/main.o
  .group         0x0000000000000000        0xc Src/syscalls.o
  .group         0x0000000000000000        0xc Src/syscalls.o
  .group         0x0000000000000000        0xc Src/syscalls.o
@@ -6143,7 +6142,7 @@ OUTPUT(core_template.elf elf32-littlearm)
  .debug_ranges  0x0000000000000328       0x10 Src/main.o
  .debug_ranges  0x0000000000000338       0x20 Startup/startup_stm32f103c8tx.o
 
-.debug_macro    0x0000000000000000     0x190a
+.debug_macro    0x0000000000000000     0x191a
  .debug_macro   0x0000000000000000      0x19f Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o
  .debug_macro   0x000000000000019f      0x17b Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.o
  .debug_macro   0x000000000000031a      0x1e6 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.o
@@ -6155,7 +6154,8 @@ OUTPUT(core_template.elf elf32-littlearm)
  .debug_macro   0x0000000000000ec1       0x46 Src/core/portable/hal/stm32f103c8tx/wrappers/hal.o
  .debug_macro   0x0000000000000f07      0x32a Src/core/portable/hal/stm32f103c8tx/wrappers/hal.o
  .debug_macro   0x0000000000001231      0x360 Src/core/portable/hal/stm32f103c8tx/wrappers/interrupt_hal.o
- .debug_macro   0x0000000000001591      0x379 Src/main.o
+ .debug_macro   0x0000000000001591      0x373 Src/main.o
+ .debug_macro   0x0000000000001904       0x16 Src/main.o
 
 .debug_line     0x0000000000000000     0x591a
  .debug_line    0x0000000000000000      0x929 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o

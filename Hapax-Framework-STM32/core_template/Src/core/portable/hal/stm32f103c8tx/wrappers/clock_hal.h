@@ -2,6 +2,7 @@
 #define CLOCK_HAL_H
 
 #include <sys_types.h>
+#include <wrappers/hal.h>
 
 typedef enum
 {
