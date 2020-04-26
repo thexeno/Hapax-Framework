@@ -25,6 +25,7 @@ gpio_hal_err_t Gpio_hal_set_mode(base_t pin_enum, gpio_hal_mode_t mode_io)
 
 gpio_hal_err_t Gpio_hal_set_value(base_t pin_enum, gpio_hal_val_t val) // per il gpio_hal_val_t metti un redefine di quello ufficiale stm32
 {
+	// TBD Usa LL
 	if (pin_enum < total_pins)
 	{
 		HAL_GPIO_WritePin(gpio_hal_cfg_buff[pin_enum].port, gpio_hal_cfg_buff[pin_enum].pin, val);

@@ -13,4 +13,5 @@ typedef enum
 
 clk_hal_err_t Clock_hal_init(void);
 
+
 #endif
