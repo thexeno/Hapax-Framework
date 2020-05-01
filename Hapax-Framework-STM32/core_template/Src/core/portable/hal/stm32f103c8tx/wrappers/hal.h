@@ -3,7 +3,7 @@
 
 #include "sys_types.h"
 #include "stm32f1xx_hal.h"
-#include "stm32f1xx_hal_conf.h"
+//#include "stm32f1xx_hal_conf.h"
 #include "system_stm32f1xx.h"
 
 //typedef uint32_t hwreg_t;

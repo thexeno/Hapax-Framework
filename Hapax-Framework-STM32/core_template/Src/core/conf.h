@@ -32,11 +32,12 @@ gpio_hal_cfg_t gpio_hal_conf[CONF_TOTAL_APP_PIN] =
 };
 
 
-timer_hal_cfg_t timer_hal_conf[1] =
+timer_hal_cfg_t timer_hal_conf_t4c1[1] =
 {
 	// TMW_PWM for example is a custom enum, as there are more than one OC type, so customisaztion can be implemented with an dditional custo
 	// name
-	{TIMER_4,	256,	3125,	TMR_PWM,	TIM_OCPOLARITY_HIGH,	TIM_CHANNEL_1}
+	// CONF_<hw_name>
+	{TIMER_4,	256,	3125,	TMR_PWM,	TIM_CHANNEL_1}
 };
 
 #endif /* HAL_CONF_H_ */

@@ -25,11 +25,12 @@
 int main(void)
 {
 	Core_hal_init();
-	Timer_hal_init(timer_hal_conf);
 	Gpio_hal_init(gpio_hal_conf, CONF_TOTAL_APP_PIN);
 	Gpio_hal_set_value(DEBUG_LED, GPIO_HIGH);
 	Gpio_hal_set_value(DEBUG_LED, GPIO_LOW);
 	//tmr start
-
+	Timer_hal_PWM_init(&timer_hal_conf_t4c1);
+	Timer_hal_PWM_start(&timer_hal_conf_t4c1);
+	Timer_hal_PWM_DC(&timer_hal_conf_t4c1, 1500);
 	for(;;);
 }

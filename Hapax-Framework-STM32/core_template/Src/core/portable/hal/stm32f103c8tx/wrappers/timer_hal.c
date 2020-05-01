@@ -1,6 +1,9 @@
 #include <wrappers/timer_hal.h>
+#include "stm32f1xx_ll_tim.h"
 
-  TIM_TypeDef* timer_base_translate[4] =
+#define TIMER_TOTAL 4U
+
+  TIM_TypeDef* timer_base_translate[TIMER_TOTAL] =
   {
 		  TIM1,
 		  TIM2,
@@ -8,33 +11,31 @@
 		  TIM4
   };
 
-static void timer_hal_error_handler(void)
+TIM_ClockConfigTypeDef sClockSourceConfig[TIMER_TOTAL] = {0};
+TIM_MasterConfigTypeDef sMasterConfig[TIMER_TOTAL] = {0};
+TIM_OC_InitTypeDef sConfigOC[TIMER_TOTAL] = {0};
+TIM_IC_InitTypeDef sConfigIC[TIMER_TOTAL] = {0};
+TIM_HandleTypeDef tim[TIMER_TOTAL];
+
+static void timer_hal_error_handler(timer_hal_err_t* flag)
 {
-    for(;;);
+    *flag = TMR_HAL_ERR;
 }
 
-timer_hal_err_t Timer_hal_init(timer_hal_cfg_t *handle)
+static timer_hal_err_t timer_hal_init(timer_hal_cfg_t *handle)
 {
-    //timer_hal_err_t ret = TMR_HAL_INIT_PEND;
-    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-    TIM_MasterConfigTypeDef sMasterConfig = {0};
-    TIM_OC_InitTypeDef sConfigOC = {0};
-    TIM_IC_InitTypeDef sConfigIC = {0};
-    TIM_HandleTypeDef tim;
-    
-    //timer_hal_cfg_buff[???] = handle;
-
-    tim.Instance = timer_base_translate[handle->base];//TIM3;
-    tim.Init.Prescaler = handle->presc;
-    tim.Init.CounterMode = TIM_COUNTERMODE_UP;  // default, change with LL
-    tim.Init.Period = handle->period;
-    tim.Init.ClockDivision = TIM_CLOCKDIVISION_DIV2; // default, chenge with LL
-    tim.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE; // default, change with LL if needed
+    timer_hal_err_t ret = TMR_HAL_OK;
+    tim[handle->periph].Instance = timer_base_translate[handle->periph];//TIM3;
+    tim[handle->periph].Init.Prescaler = handle->presc;
+    tim[handle->periph].Init.CounterMode = TIM_COUNTERMODE_UP;  // default, change with LL
+    tim[handle->periph].Init.Period = handle->period;
+    tim[handle->periph].Init.ClockDivision = TIM_CLOCKDIVISION_DIV2; // default, chenge with LL
+    tim[handle->periph].Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE; // default, change with LL if needed
 
 #warning "Interrupt are enabled my default"
 #warning "TBD Interrupt selection"
 
-    switch (handle->base)
+    switch (handle->periph)
     {
 
     case TIMER_1:
@@ -68,81 +69,135 @@ timer_hal_err_t Timer_hal_init(timer_hal_cfg_t *handle)
         break;
 
     default:
-        timer_hal_error_handler();
+        timer_hal_error_handler(&ret);
         break;
     }
 
-    if (HAL_TIM_Base_Init(&tim) != HAL_OK)
+    if (HAL_TIM_Base_Init(&tim[handle->periph]) != HAL_OK)
     {
-        timer_hal_error_handler();
+        timer_hal_error_handler(&ret);
     }
-    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL; // default, change with LL
-    if (HAL_TIM_ConfigClockSource(&tim, &sClockSourceConfig) != HAL_OK)
+    sClockSourceConfig[handle->periph].ClockSource = TIM_CLOCKSOURCE_INTERNAL; // default, change with LL
+    if (HAL_TIM_ConfigClockSource(&tim[handle->periph], &sClockSourceConfig[handle->periph]) != HAL_OK)
     {
-        timer_hal_error_handler();
+        timer_hal_error_handler(&ret);
+    }
+    return ret;
+}
+
+timer_hal_err_t Timer_hal_PWM_init(timer_hal_cfg_t *handle)
+{
+    timer_hal_err_t ret = TMR_HAL_OK;
+    if (timer_hal_init(handle) != TMR_HAL_OK)
+    {
+        return TMR_HAL_ERR;
     }
 
-    if (handle->mode == TMR_INPUT_CAPT)
+    if (HAL_TIM_PWM_Init(&tim[handle->periph]) != HAL_OK)
     {
-        if (HAL_TIM_IC_Init(&tim) != HAL_OK)
-        {
-            timer_hal_error_handler();
-        }
-        sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;       // default, change with LL
-        sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE; // default, change with LL
-        if (HAL_TIMEx_MasterConfigSynchronization(&tim, &sMasterConfig) != HAL_OK)
-        {
-            timer_hal_error_handler();
-        }
-        sConfigIC.ICPolarity = handle->polarity;//TIM_INPUTCHANNELPOLARITY_RISING;
-        sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
-        sConfigIC.ICPrescaler = TIM_ICPSC_DIV1; // default, change with LL
-        sConfigIC.ICFilter = 0; // default, change with LL
-        if (HAL_TIM_IC_ConfigChannel(&tim, &sConfigIC, handle->channel/*TIM_CHANNEL_1*/) != HAL_OK)
-        {
-            timer_hal_error_handler();
-        }
+        timer_hal_error_handler(&ret);
     }
-    else if (handle->mode == TMR_PWM)
+
+    sMasterConfig[handle->periph].MasterOutputTrigger = TIM_TRGO_RESET;
+    sMasterConfig[handle->periph].MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+    if (HAL_TIMEx_MasterConfigSynchronization(&tim[handle->periph], &sMasterConfig[handle->periph]) != HAL_OK)
     {
-        if (HAL_TIM_PWM_Init(&tim) != HAL_OK)
-        {
-            timer_hal_error_handler();
-        }
-        sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-        sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-        if (HAL_TIMEx_MasterConfigSynchronization(&tim, &sMasterConfig) != HAL_OK)
-        {
-            timer_hal_error_handler();
-        }
-        sConfigOC.OCMode = TIM_OCMODE_PWM1; // default, change with LL
-        sConfigOC.Pulse = 0;
-        sConfigOC.OCPolarity = handle->polarity;//TIM_OCPOLARITY_HIGH;
-        sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-        if (HAL_TIM_PWM_ConfigChannel(&tim, &sConfigOC, handle->channel) != HAL_OK)
-        {
-            timer_hal_error_handler();
-        }
+        timer_hal_error_handler(&ret);
     }
-    else if (handle->mode == TMR_OUTPUT_COMP)
-    {
-        sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-        sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-        if (HAL_TIMEx_MasterConfigSynchronization(&tim, &sMasterConfig) != HAL_OK)
-        {
-            timer_hal_error_handler();
-        }
-        sConfigOC.OCMode = TIM_OCMODE_TIMING; // default, change with LL
-        sConfigOC.Pulse = 0;
-        sConfigOC.OCPolarity = handle->polarity;//TIM_OCPOLARITY_HIGH;
-        sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-        if (HAL_TIM_OC_ConfigChannel(&tim, &sConfigOC, handle->channel) != HAL_OK)
-        {
-            timer_hal_error_handler();
-        }
-    }
+
+    if (handle->mode == TMR_PWM)
+        sConfigOC[handle->periph].OCMode = TIM_OCMODE_PWM1; // default, change with LL
+    else if (handle->mode == TMR_PWM_INV)
+        sConfigOC[handle->periph].OCMode = TIM_OCMODE_PWM2; // default, change with LL
     else
     {
-        timer_hal_error_handler();
+        timer_hal_error_handler(&ret);
+    }
+    
+    sConfigOC[handle->periph].Pulse = 0;
+    sConfigOC[handle->periph].OCPolarity = TIM_OCPOLARITY_HIGH;
+    sConfigOC[handle->periph].OCFastMode = TIM_OCFAST_DISABLE;
+    if (HAL_TIM_PWM_ConfigChannel(&tim[handle->periph], &sConfigOC[handle->periph], handle->channel) != HAL_OK)
+    {
+        timer_hal_error_handler(&ret);
+    }
+    return ret;
+}
+
+
+//     if (handle->mode == TMR_INPUT_CAPT)
+//     {
+//         if (HAL_TIM_IC_Init(&tim[handle->periph]) != HAL_OK)
+//         {
+//             timer_hal_error_handler();
+//         }
+//         sMasterConfig[handle->periph].MasterOutputTrigger = TIM_TRGO_RESET;       // default, change with LL
+//         sMasterConfig[handle->periph].MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE; // default, change with LL
+//         if (HAL_TIMEx_MasterConfigSynchronization(&tim[handle->periph], &sMasterConfig[handle->periph]) != HAL_OK)
+//         {
+//             timer_hal_error_handler();
+//         }
+//         sConfigIC[handle->periph].ICPolarity = handle->polarity;//TIM_INPUTCHANNELPOLARITY_RISING;
+//         sConfigIC[handle->periph].ICSelection = TIM_ICSELECTION_DIRECTTI;
+//         sConfigIC[handle->periph].ICPrescaler = TIM_ICPSC_DIV1; // default, change with LL
+//         sConfigIC[handle->periph].ICFilter = 0; // default, change with LL
+//         if (HAL_TIM_IC_ConfigChannel(&tim[handle->periph], &sConfigIC[handle->periph], handle->channel/*TIM_CHANNEL_1*/) != HAL_OK)
+//         {
+//             timer_hal_error_handler();
+//         }
+//     }
+//     else if (handle->mode == TMR_PWM)
+//     {
+ 
+//     }
+//     else if (handle->mode == TMR_OUTPUT_COMP)
+//     {
+//         sMasterConfig[handle->periph].MasterOutputTrigger = TIM_TRGO_RESET;
+//         sMasterConfig[handle->periph].MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+//         if (HAL_TIMEx_MasterConfigSynchronization(&tim[handle->periph], &sMasterConfig[handle->periph]) != HAL_OK)
+//         {
+//             timer_hal_error_handler();
+//         }
+//         sConfigOC[handle->periph].OCMode = TIM_OCMODE_TIMING; // default, change with LL
+//         sConfigOC[handle->periph].Pulse = 0;
+//         sConfigOC[handle->periph].OCPolarity = handle->polarity;//TIM_OCPOLARITY_HIGH;
+//         sConfigOC[handle->periph].OCFastMode = TIM_OCFAST_DISABLE;
+//         if (HAL_TIM_OC_ConfigChannel(&tim[handle->periph], &sConfigOC[handle->periph], handle->channel) != HAL_OK)
+//         {
+//             timer_hal_error_handler();
+//         }
+//     }
+//     else
+//     {
+//         timer_hal_error_handler();
+//     }
+// }
+
+
+void Timer_hal_PWM_start(timer_hal_cfg_t *handle)
+{
+    HAL_TIM_PWM_Start(&tim[handle->periph], handle->channel);
+}
+
+
+void Timer_hal_PWM_DC(timer_hal_cfg_t *handle, uint32_t val)
+{
+    switch (handle->channel)
+    {
+    case TIM_CHANNEL_1:
+    LL_TIM_OC_SetCompareCH1(tim[handle->periph].Instance, val);
+    break;
+    case TIM_CHANNEL_2:
+    LL_TIM_OC_SetCompareCH2(tim[handle->periph].Instance, val);
+    break;
+    case TIM_CHANNEL_3:
+    LL_TIM_OC_SetCompareCH3(tim[handle->periph].Instance, val);
+    break;
+    case TIM_CHANNEL_4:
+    LL_TIM_OC_SetCompareCH4(tim[handle->periph].Instance, val);
+    break;   
+
+    default:
+    break;
     }
 }
