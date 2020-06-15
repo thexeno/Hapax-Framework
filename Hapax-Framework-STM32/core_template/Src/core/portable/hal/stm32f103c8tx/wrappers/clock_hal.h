@@ -12,6 +12,6 @@ typedef enum
 } clk_hal_err_t;
 
 clk_hal_err_t Clock_hal_init(void);
-
+void Clock_hal_clk_out(uint32_t src);
 
 #endif

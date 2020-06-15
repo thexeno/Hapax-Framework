@@ -1,43 +1,33 @@
 #ifndef CONF_H
 #define CONF_H
 
-#include <wrappers/timer_hal.h>
-#include <wrappers/clock_hal.h>
-#include <wrappers/gpio_hal.h>
-#include <wrappers/hal.h>
+#include "sys_types.h"
 
-
-//#define LSE_VALUE
-
-// CPU configs
-#define CONF_CPU_FREQ	 16000000UL
-
-// Utils config
-//typedef uint8_t rb_sz_t;
-
-
-
-enum
+// cosi sei obbligato a dichiarare per cosa hai incluso
+typedef enum
 {
-	DEBUG_LED,
-	TIMER4_PIN,
+	DEBUG_LED = 0,
+	TIMER4_TEST_PIN0,
 	MCO_PIN,
-	CONF_TOTAL_APP_PIN
-};
-gpio_hal_cfg_t gpio_hal_conf[CONF_TOTAL_APP_PIN] =
+	TIMER4_TEST_PIN1,
+    CONF_GPIO_ENUM_UNUSED
+} conf_gpio_e;
+
+
+typedef enum
 {
-	{DEBUG_LED,		GPIOC, GPIO_PIN_13, GPIO_MODE_OUTPUT_PP, GPIO_PIN_SET,   GPIO_NOPULL}, // metti l-init pend interno all'hal
-	{TIMER4_PIN,	GPIOB, GPIO_PIN_6,  GPIO_MODE_AF_PP, 	 GPIO_PIN_RESET, GPIO_NOPULL},
-	{MCO_PIN, 		GPIOA, GPIO_PIN_8,	GPIO_MODE_AF_PP,	 GPIO_PIN_RESET, GPIO_NOPULL}
-};
+	TIMER_4 = 0,
+	TIMER_3,
+	CONF_TIMER_ENUM_UNUSED
+} conf_timer_e;
 
 
-timer_hal_cfg_t timer_hal_conf_t4c1[1] =
+typedef enum
 {
-	// TMW_PWM for example is a custom enum, as there are more than one OC type, so customisaztion can be implemented with an dditional custo
-	// name
-	// CONF_<hw_name>
-	{TIMER_4,	256,	3125,	TMR_PWM,	TIM_CHANNEL_1}
-};
+	PWM_CHANNEL_TEST_1 = 0,
+	PWM_CHANNEL_TEST_2,
+	PWM_CHANNEL_TEST_3,
+	CONF_PWM_ENUM_UNUSED
+} conf_pwm_e;
 
-#endif /* HAL_CONF_H_ */
+#endif

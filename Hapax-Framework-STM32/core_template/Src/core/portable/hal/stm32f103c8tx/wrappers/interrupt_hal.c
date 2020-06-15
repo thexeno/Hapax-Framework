@@ -63,7 +63,7 @@ void IntHal_vector_init(void)
 		isr_pt_array[temp].isr_pt = &IntHal_default_ISR;
 		isr_pt_array[temp].state = INTERRUPT_DEFAULT;	
 	}
-	IntHal_restore_global_interrupt(status);
+	//IntHal_restore_global_interrupt(status);
 }
 
 
@@ -101,6 +101,10 @@ void I2C1_ER_IRQHandler(void)
   isr_pt_array[I2C1_ER_IRQHandler_num].isr_pt();
 }
 
+void TIM4_IRQHandler(void)
+{
+  isr_pt_array[TIM4_IRQHandler_num].isr_pt();
+}
 
 /******************************************************************************/
 /*           Cortex-M3 Processor Interruption and Exception Handlers          */ 

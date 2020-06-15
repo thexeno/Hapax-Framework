@@ -11,6 +11,7 @@ typedef uint32_t cpu_dw_t;
 typedef uint32_t base_t;
 
 
+
 void Core_hal_init(void);
 
 #endif /* HAL_H_ */

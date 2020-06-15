@@ -17,20 +17,66 @@
  ******************************************************************************
  */
 #include "conf.h"
-
+#include "hal.h"
+#include "gpio_hal.h"
+#include "timer_hal.h"
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
+gpio_hal_cfg_t* gpio_prova_conf;
+timer_hal_cfg_t* timer_prova_conf;
+
+void prova_isr_app(conf_timer_e timer)
+{
+	if (timer == TIMER_4) // livello applicativo, puo avere qualisasi nome
+	{
+
+		Gpio_hal_set_value(DEBUG_LED, GPIO_LOW);  // stesso per gpio, puo avere qualisasi nome
+
+		//Timer_hal_OC_period(&timer_hal_test_conf[1], (uint16_t)(Timer_hal_OC_get(&timer_hal_test_conf[1])+1500));
+		Gpio_hal_set_value(DEBUG_LED, GPIO_HIGH);
+	}
+	else
+	{
+		asm("nop");
+	}
+}
+
+
 int main(void)
 {
+    gpio_prova_conf = Gpio_hal_conf_get();
+	// prepare the eventual additiona HAL layers
 	Core_hal_init();
-	Gpio_hal_init(gpio_hal_conf, CONF_TOTAL_APP_PIN);
+	// clock
+	Clock_hal_init();
+	// interrupt systeme
+	IntHal_vector_init();
+
+	Gpio_hal_init(gpio_prova_conf);
 	Gpio_hal_set_value(DEBUG_LED, GPIO_HIGH);
 	Gpio_hal_set_value(DEBUG_LED, GPIO_LOW);
-	//tmr start
-	Timer_hal_PWM_init(&timer_hal_conf_t4c1);
-	Timer_hal_PWM_start(&timer_hal_conf_t4c1);
-	Timer_hal_PWM_DC(&timer_hal_conf_t4c1, 1500);
+	// Clock_hal_clk_out(RCC_MCO1SOURCE_HSI); // debug - not HAL compliant
+
+	// //tmr start
+    timer_prova_conf = Timer_hal_conf_get();
+	Timer_hal_init(timer_prova_conf);
+	Timer_hal_set_ISR_cb(TIMER_4, prova_isr_app);
+	// //pwm
+	// Timer_hal_PWM_init(&timer_hal_test_conf[0]);
+	// Timer_hal_PWM_start(&timer_hal_test_conf[0]);
+	// Timer_hal_PWM_DC(&timer_hal_test_conf[0], 1500);
+	// // OC
+	// Timer_hal_OC_init(&timer_hal_test_conf[1]);
+	// Timer_hal_OC_start(&timer_hal_test_conf[1]);
+	// // one pulse
+	
+
+	//Timer_hal_OC_period(&timer_hal_test_conf[1], 1500);
+
+//int enable
+	IntHal_enable_global_interrupt();
+
 	for(;;);
 }

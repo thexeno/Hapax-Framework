@@ -7,6 +7,7 @@ typedef enum
 {
 	I2C1_EV_IRQHandler_num = 0,
 	I2C1_ER_IRQHandler_num,
+	TIM4_IRQHandler_num,
 	TOTAL_ISR_USABLE
 } int_hal_vect_num_t;
 
