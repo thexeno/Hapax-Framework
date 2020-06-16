@@ -8,7 +8,10 @@ typedef enum
 	I2C1_EV_IRQHandler_num = 0,
 	I2C1_ER_IRQHandler_num,
 	TIM4_IRQHandler_num,
-	TOTAL_ISR_USABLE
+    TIM3_IRQHandler_num,
+    TIM2_IRQHandler_num,
+    TIM1_IRQHandler_num,
+	INT_HAL_TOTAL_ISR
 } int_hal_vect_num_t;
 
 base_t IntHal_suspend_global_interrupt(void);

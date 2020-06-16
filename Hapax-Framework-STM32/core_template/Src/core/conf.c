@@ -60,27 +60,27 @@ const timer_hal_conf_t timer_test[TIMER_TOTAL_INSTANCE] =
     {TIMER_4,                   TIM4,   1,    0xffff}
 };
 
-const timer_hal_pwm_conf_t  pwm_test[PWM_CHANNEL_TOTAL] = 
+const timer_hal_pwm_conf_t  pwm_test[PWM_TOTAL_ISTANCE] = 
 {
-    {PWM_CHANNEL_TEST_1, TIMER_3,   TIM_CHANNEL_1, TMR_PWM,   TIM_OCPOLARITY_HIGH,     TIMER_HAL_INT_OFF}
+    {PWM_CHANNEL_TEST_1, TIMER_3,   TIM_CHANNEL_1, TIM_OCMODE_PWM1,   TIM_OCPOLARITY_HIGH,     TIMER_HAL_INT_OFF}
     //{PWM_CHANNEL_TEST_2, TIMER_4,   TIM_CHANNEL_4, TMR_PWM,    TIM_OCPOLARITY_LOW,      TMR_INT_OFF},
     //{PWM_CHANNEL_TEST_3, TIMER_3,   TIM_CHANNEL_4, TMR_PWM,    TIM_OCPOLARITY_HIGH,     TMR_INT_OFF}
 };
 
-const timer_hal_oc_conf_t  oc_test[OC_CHANNEL_TOTAL] = 
+const timer_hal_oc_conf_t  oc_test[OC_TOTAL_ISTANCE] = 
 {
     {OC_CHANNEL_TEST_1, TIMER_4,   TIM_CHANNEL_1, TIM_OCMODE_TIMING,    TIM_OCPOLARITY_HIGH,     TIMER_HAL_INT_ON}
 };
-conf_oc_e pwm_enum;    // Define
-conf_timer_e tmr;      // Define
-timer_hal_channel_t channel;
-timer_hal_oc_mode_t mode;
-timer_hal_pol_t pol;
-timer_hal_int_t interrupt;
+
 
 const timer_hal_pwm_conf_t * const Timer_hal_PWM_conf_get(void)
 {
     return (const *)(pwm_test/*[0]*/);
+}
+
+const timer_hal_oc_conf_t * const Timer_hal_OC_conf_get(void)
+{
+    return (const *)(oc_test/*[0]*/);
 }
 
 const timer_hal_conf_t * const Timer_hal_conf_get(void)

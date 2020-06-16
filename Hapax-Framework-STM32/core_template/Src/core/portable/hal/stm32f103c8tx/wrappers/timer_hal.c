@@ -6,9 +6,9 @@
 // If needed, try with ONe pulse for controlling the WS2812 LEDs
 typedef void (*timer_hal_isr_cb)(timer_hal_irq_src_t );
 static timer_hal_isr_cb timer_hal_ISR_cb[TIMER_TOTAL_INSTANCE];
-static timer_hal_cfg_t *timer_hal_cfg_buff;
-static pwm_hal_cfg_t *pwm_hal_cfg_buff;
-static oc_hal_cfg_t *oc_hal_cfg_buff;
+static timer_hal_conf_t *timer_hal_cfg_buff;
+static pwm_hal_conf_t *pwm_hal_cfg_buff;
+static oc_hal_conf_t *oc_hal_cfg_buff;
 static timer_hal_err_t timers_ready = TIMER_HAL_ERR_INIT_PEND;
 
 /* Translation tables: 
@@ -25,15 +25,6 @@ static timer_hal_err_t timers_ready = TIMER_HAL_ERR_INIT_PEND;
 // 	TIM4
 // };
 
-/* according to the HAL and CMSIS */
-uint32_t timer_ch_translate[TIMER_TOTAL_INSTANCE] =
-{
-    TIM_CHANNEL_1,
-    TIM_CHANNEL_2,
-    TIM_CHANNEL_3,
-    TIM_CHANNEL_4
-};
-
 
 static TIM_ClockConfigTypeDef sClockSourceConfig[TIMER_TOTAL_INSTANCE] = {0};
 static TIM_MasterConfigTypeDef sMasterConfig[TIMER_TOTAL_INSTANCE] = {0};
@@ -46,16 +37,16 @@ static void timer4_isr()
 {
 	// metti cb
     if  (__HAL_TIM_GET_IT_SOURCE(&tim[TIMER_4], TIM_IT_CC1))
-    	timer_hal_ISR_cb[TIMER_4](TIMER_CH1); // callback which will provide the calling hardware ID (i.e TIMER_4) to the application
+    	timer_hal_ISR_cb[TIMER_4](TIMER_HAL_CH1); // callback which will provide the calling hardware ID (i.e TIMER_4) to the application
 	
     else if (__HAL_TIM_GET_IT_SOURCE(&tim[TIMER_4], TIM_IT_CC2))
-    	timer_hal_ISR_cb[TIMER_4](TIMER_CH2);
+    	timer_hal_ISR_cb[TIMER_4](TIMER_HAL_CH2);
 	
     else if (__HAL_TIM_GET_IT_SOURCE(&tim[TIMER_4], TIM_IT_CC3))
-    	timer_hal_ISR_cb[TIMER_4](TIMER_CH3);
+    	timer_hal_ISR_cb[TIMER_4](TIMER_HAL_CH3);
 	
     else if (__HAL_TIM_GET_IT_SOURCE(&tim[TIMER_4], TIM_IT_CC4))
-    	timer_hal_ISR_cb[TIMER_4](TIMER_CH4);
+    	timer_hal_ISR_cb[TIMER_4](TIMER_HAL_CH4);
     
     else
     {
@@ -66,8 +57,22 @@ static void timer4_isr()
 static void timer3_isr()
 {
 	// metti cb
-//	timer_hal_ISR_cb[TIMER_3](TIMER_3); // callback a i.e. ser_rx_char_ISR(ser_dev_st* console)
+    if  (__HAL_TIM_GET_IT_SOURCE(&tim[TIMER_3], TIM_IT_CC1))
+    	timer_hal_ISR_cb[TIMER_3](TIMER_HAL_CH1); // callback which will provide the calling hardware ID (i.e TIMER_4) to the application
 	
+    else if (__HAL_TIM_GET_IT_SOURCE(&tim[TIMER_3], TIM_IT_CC2))
+    	timer_hal_ISR_cb[TIMER_3](TIMER_HAL_CH2);
+	
+    else if (__HAL_TIM_GET_IT_SOURCE(&tim[TIMER_3], TIM_IT_CC3))
+    	timer_hal_ISR_cb[TIMER_3](TIMER_HAL_CH3);
+	
+    else if (__HAL_TIM_GET_IT_SOURCE(&tim[TIMER_3], TIM_IT_CC4))
+    	timer_hal_ISR_cb[TIMER_3](TIMER_HAL_CH4);
+    
+    else
+    {
+        // nothing and return
+    }
 }
 
 static void timer2_isr()
@@ -170,7 +175,7 @@ timer_hal_err_t Timer_hal_init(timer_hal_conf_t *handle)
 /* With timer_hal_channel_t, the user function CB will be called from the ISR with the hardware channel 
  * responsible of the IRQ as parameter
  */ 
-void Timer_hal_set_ISR_cb(conf_timer_e tmr, void (*f_pt)(timer_hal_channel_t))
+void Timer_hal_set_ISR_cb(conf_timer_e tmr, void (*f_pt)(timer_hal_irq_src_t))
 {
     for (int i = 0; i < TIMER_TOTAL_INSTANCE; i++)
     {
@@ -390,7 +395,7 @@ void Timer_hal_PWM_start(conf_pwm_e pwm)
     {
         if (pwm_hal_cfg_buff[i].pwm_enum == pwm)
         {
-            HAL_TIM_PWM_Start(&tim[i], timer_ch_translate[i]);
+            HAL_TIM_PWM_Start(&tim[i], pwm_hal_cfg_buff[i].channel);
             break;
         }
     }

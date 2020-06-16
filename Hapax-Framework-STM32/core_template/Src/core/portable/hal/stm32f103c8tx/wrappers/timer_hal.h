@@ -19,11 +19,7 @@ typedef TIM_TypeDef*  timer_hal_periph_t;
 #define PWM_TOTAL_ISTANCE CONF_PWM_ENUM_UNUSED // situation can get very custom and numerous, so might be better to allocate only the really used ones
 #define OC_TOTAL_ISTANCE CONF_OC_ENUM_UNUSED // situation can get very custom and numerous, so might be better to allocate only the really used ones
 
-typedef enum
-{
-	TIMER_HAL_POL_HIGH = 0,
-	TIMER_HAL_POL_LOW
-} timer_hal_pol_t;
+
 
 typedef enum
 {
@@ -41,24 +37,13 @@ typedef enum
 	TIMER_HAL_ERR_ERROR
 } timer_hal_err_t;
 
-typedef enum
-{
-	TIMER_HAL_MODE_INPUT_CAPT = 0,
-	TIMER_HAL_MODE_COMP_SW_TIME,
-	TIMER_HAL_MODE_COMP_SET,
-	TIMER_HAL_MODE_COMP_RESET,
-	TIMER_HAL_MODE_COMP_TOGGLE,
-	TIMER_HAL_MODE_PWM,
-	TIMER_HAL_MODE_PWM_INV,
-	TIMER_HAL_MODE_ONE_PULSE
-} timer_hal_mode_t;
 
 typedef enum
 {
 	TIMER_HAL_INT_ON,
 	TIMER_HAL_INT_OFF
 } timer_hal_int_t;
-#warning "cambia i nomi.. TIMER_HAL_<enum_function>_<name>"
+
 
 // Basic timer configuration structure
 typedef struct
