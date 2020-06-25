@@ -15,7 +15,7 @@ typedef uint32_t      gpio_hal_pull_t;
 #define GPIO_HIGH GPIO_PIN_SET     
 #define GPIO_LOW  GPIO_PIN_RESET
 
-#define GPIO_TOTAL_PIN 12
+#define GPIO_TOTAL_PIN CONF_GPIO_ENUM_UNUSED
 
 typedef enum
 {

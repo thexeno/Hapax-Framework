@@ -75,17 +75,17 @@ const timer_hal_oc_conf_t  oc_test[OC_TOTAL_ISTANCE] =
 
 const timer_hal_pwm_conf_t * const Timer_hal_PWM_conf_get(void)
 {
-    return (const *)(pwm_test/*[0]*/);
+    return (pwm_test/*[0]*/);
 }
 
 const timer_hal_oc_conf_t * const Timer_hal_OC_conf_get(void)
 {
-    return (const *)(oc_test/*[0]*/);
+    return (oc_test/*[0]*/);
 }
 
 const timer_hal_conf_t * const Timer_hal_conf_get(void)
 {
-    return (const *)(timer_test/*[0]*/);
+    return (timer_test/*[0]*/);
 }
 
 

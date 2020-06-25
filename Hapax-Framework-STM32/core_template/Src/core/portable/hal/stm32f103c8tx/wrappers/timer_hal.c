@@ -177,7 +177,7 @@ void Timer_hal_set_ISR_cb(conf_timer_e tmr, void (*f_pt)(timer_hal_irq_src_t))
     {
         if (timer_hal_cfg_buff[i].tmr == tmr)
         {
-            timer_hal_ISR_cb[i] = f_pt;
+            timer_hal_ISR_cb[timer_hal_cfg_buff[i].tmr] = f_pt; // indexing with timer_hal_cfg_buff[i].tmr to have freedom in defining the order in conf.
             break;
         }
     }
@@ -223,25 +223,36 @@ timer_hal_err_t Timer_hal_OC_init(const timer_hal_oc_conf_t *handle)
     {
         if (handle[i].tmr != CONF_TIMER_ENUM_UNUSED)
         {
-            if (HAL_TIM_OC_Init(&tim[i]) != HAL_OK)
+        	int j = 0;
+        	while (timer_hal_cfg_buff[j].tmr != handle[i].tmr)
+        	{
+        		// Find the right index in the timer conf, so can be used to
+        		// index the tim[] for the OC conf. Works based on the fact oc conf is always a subset of
+        		// timer conf for hardware reasons.
+        		if (j > TIMER_TOTAL_INSTANCE)
+        			timer_hal_error_handler(&ret);
+        		j++;
+        	}
+            if (HAL_TIM_OC_Init(&tim[j]) != HAL_OK) // ...hence search with j
+            {
+                timer_hal_error_handler(&ret);
+            }
+            // i is used only for the handle[], j for the internal timer structs.
+            // handle[i] configures the j-th timer struct.
+            sMasterConfig[j].MasterOutputTrigger = TIM_TRGO_RESET;
+            sMasterConfig[j].MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+            if (HAL_TIMEx_MasterConfigSynchronization(&tim[j], &sMasterConfig[j]) != HAL_OK)
             {
                 timer_hal_error_handler(&ret);
             }
 
-            sMasterConfig[i].MasterOutputTrigger = TIM_TRGO_RESET;
-            sMasterConfig[i].MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-            if (HAL_TIMEx_MasterConfigSynchronization(&tim[i], &sMasterConfig[i]) != HAL_OK)
-            {
-                timer_hal_error_handler(&ret);
-            }
-
-            sConfigOC[i].OCMode = handle[i].mode; 
+            sConfigOC[j].OCMode = handle[i].mode;
                         
-            sConfigOC[i].Pulse = 0;
-            sConfigOC[i].OCPolarity = handle[i].pol;
+            sConfigOC[j].Pulse = 0;
+            sConfigOC[j].OCPolarity = handle[i].pol;
             
-            sConfigOC[i].OCFastMode = TIM_OCFAST_DISABLE;
-            if (HAL_TIM_OC_ConfigChannel(&tim[i], &sConfigOC[i],  handle[i].channel) != HAL_OK)
+            sConfigOC[j].OCFastMode = TIM_OCFAST_DISABLE;
+            if (HAL_TIM_OC_ConfigChannel(&tim[j], &sConfigOC[j],  handle[i].channel) != HAL_OK)
             {
                 timer_hal_error_handler(&ret);
             }
@@ -251,37 +262,31 @@ timer_hal_err_t Timer_hal_OC_init(const timer_hal_oc_conf_t *handle)
                 switch (handle[i].channel)
                 {
                     case TIM_CHANNEL_1:
-                    __HAL_TIM_ENABLE_IT(&tim[i], TIM_IT_CC1);
+                    __HAL_TIM_ENABLE_IT(&tim[j], TIM_IT_CC1);
                     break;
                     case TIM_CHANNEL_2:
-                    __HAL_TIM_ENABLE_IT(&tim[i], TIM_IT_CC2);
+                    __HAL_TIM_ENABLE_IT(&tim[j], TIM_IT_CC2);
                     break;
                     case TIM_CHANNEL_3:
-                    __HAL_TIM_ENABLE_IT(&tim[i], TIM_IT_CC3);
+                    __HAL_TIM_ENABLE_IT(&tim[j], TIM_IT_CC3);
                     break;
                     case TIM_CHANNEL_4:
-                    __HAL_TIM_ENABLE_IT(&tim[i], TIM_IT_CC4);
+                    __HAL_TIM_ENABLE_IT(&tim[j], TIM_IT_CC4);
                     break;
                     default:
                     timer_hal_error_handler(&ret);
                     break;
                 }
 
-                for (int j = 0; j < TIMER_TOTAL_INSTANCE; i++)
-                {
-                    if (timer_hal_cfg_buff[j].tmr == handle[i].tmr)
-                    {
-                         if (timer_hal_cfg_buff[j].periph == TIM1)
-                             IntHal_vector_register(timer1_isr, TIM1_IRQHandler_num);
-                         else if (timer_hal_cfg_buff[j].periph == TIM2)
-                             IntHal_vector_register(timer2_isr, TIM2_IRQHandler_num);                
-                         else if (timer_hal_cfg_buff[j].periph == TIM3)
-                             IntHal_vector_register(timer3_isr, TIM3_IRQHandler_num);                
-                         else if (timer_hal_cfg_buff[j].periph == TIM4)
-                             IntHal_vector_register(timer4_isr, TIM4_IRQHandler_num);                
-                         else {}
-                    }
-                }
+				if (timer_hal_cfg_buff[j].periph == TIM1)
+					IntHal_vector_register(timer1_isr, TIM1_IRQHandler_num);
+				else if (timer_hal_cfg_buff[j].periph == TIM2)
+					IntHal_vector_register(timer2_isr, TIM2_IRQHandler_num);
+				else if (timer_hal_cfg_buff[j].periph == TIM3)
+					IntHal_vector_register(timer3_isr, TIM3_IRQHandler_num);
+				else if (timer_hal_cfg_buff[j].periph == TIM4)
+					IntHal_vector_register(timer4_isr, TIM4_IRQHandler_num);
+				else {}
             }
         }
     }
@@ -292,9 +297,19 @@ void Timer_hal_OC_start(conf_oc_e oc)
 {
     for (int i = 0; i<CONF_OC_ENUM_UNUSED; i++)
     {
-        if (oc_hal_cfg_buff[i].oc_enum == oc)
+      	int j = 0;
+        while (timer_hal_cfg_buff[j].tmr != oc_hal_cfg_buff[i].tmr)
         {
-            HAL_TIM_OC_Start(&tim[i], oc_hal_cfg_buff[i].channel);
+    		if (j > TIMER_TOTAL_INSTANCE)
+    		{
+    			timer_hal_err_t* ret; // for compliance
+    			timer_hal_error_handler(&ret); // for further error implementation
+    		}
+    		j++;
+        }
+		if (oc_hal_cfg_buff[i].oc_enum == oc)
+		{
+			HAL_TIM_OC_Start(&tim[j], oc_hal_cfg_buff[i].channel);
         }
     }
 }
