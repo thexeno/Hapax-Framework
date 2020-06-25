@@ -2,7 +2,7 @@
 #include "conf.h"
 
 
-gpio_hal_cfg_t *gpio_hal_cfg_buff;
+const gpio_hal_cfg_t *gpio_hal_cfg_buff;
 base_t total_pins = 0;
 
 gpio_hal_err_t Gpio_hal_set_mode(conf_gpio_e pin_enum, gpio_hal_mode_t mode_io)
@@ -78,13 +78,13 @@ base_t Gpio_hal_parallel_get_val(gpio_hal_port_t port_id, base_t val)
 }
 
 
-void Gpio_hal_init(gpio_hal_cfg_t* handle)
+void Gpio_hal_init(const gpio_hal_cfg_t* handle)
 {
 	uint8_t i = 0;
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
 
 	gpio_hal_cfg_buff = handle;
-	total_pins = Gpio_hal_conf_size();
+	total_pins = Gpio_hal_conf_get_size();
 
 	for (i = 0; i < total_pins; i++)
 	{

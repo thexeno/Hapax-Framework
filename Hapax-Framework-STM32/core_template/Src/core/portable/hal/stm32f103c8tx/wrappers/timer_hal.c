@@ -6,9 +6,9 @@
 // If needed, try with ONe pulse for controlling the WS2812 LEDs
 typedef void (*timer_hal_isr_cb)(timer_hal_irq_src_t );
 static timer_hal_isr_cb timer_hal_ISR_cb[TIMER_TOTAL_INSTANCE];
-static timer_hal_conf_t *timer_hal_cfg_buff;
-static pwm_hal_conf_t *pwm_hal_cfg_buff;
-static oc_hal_conf_t *oc_hal_cfg_buff;
+static const timer_hal_conf_t *timer_hal_cfg_buff;
+static const timer_hal_pwm_conf_t *pwm_hal_cfg_buff;
+static const timer_hal_oc_conf_t *oc_hal_cfg_buff;
 static timer_hal_err_t timers_ready = TIMER_HAL_ERR_INIT_PEND;
 
 /* Translation tables: 
@@ -94,7 +94,7 @@ static void timer_hal_error_handler(timer_hal_err_t* flag)
     *flag = TIMER_HAL_ERR_ERROR;
 }
 
-timer_hal_err_t Timer_hal_init(timer_hal_conf_t *handle)
+timer_hal_err_t Timer_hal_init(const timer_hal_conf_t *handle)
 {
     timer_hal_err_t ret = TIMER_HAL_ERR_OK;
     timer_hal_cfg_buff = handle;
@@ -110,44 +110,40 @@ timer_hal_err_t Timer_hal_init(timer_hal_conf_t *handle)
            tim[i].Init.ClockDivision = TIM_CLOCKDIVISION_DIV2; // default, chenge with LL
            tim[i].Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE; // default, change with LL if needed
 
-            switch (handle[i].periph)
-                {
-
-                case TIM1:
-                    __HAL_RCC_TIM1_CLK_ENABLE();
-                    HAL_NVIC_SetPriority(TIM1_BRK_IRQn, 0, 0);
-                    HAL_NVIC_EnableIRQ(TIM1_BRK_IRQn);
-                    HAL_NVIC_SetPriority(TIM1_UP_IRQn, 0, 0);
-                    HAL_NVIC_EnableIRQ(TIM1_UP_IRQn);
-                    HAL_NVIC_SetPriority(TIM1_TRG_COM_IRQn, 0, 0);
-                    HAL_NVIC_EnableIRQ(TIM1_TRG_COM_IRQn);
-                    HAL_NVIC_SetPriority(TIM1_CC_IRQn, 0, 0);
-                    HAL_NVIC_EnableIRQ(TIM1_CC_IRQn);
-                    break;
-
-                case TIM2:
-                    __HAL_RCC_TIM2_CLK_ENABLE();
-                    HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
-                    HAL_NVIC_EnableIRQ(TIM2_IRQn);
-                    break;
-
-                case TIM3:
-                    __HAL_RCC_TIM3_CLK_ENABLE();
-                    HAL_NVIC_SetPriority(TIM3_IRQn, 0, 0);
-                    HAL_NVIC_EnableIRQ(TIM3_IRQn);
-                    break;
-
-                case TIM4:
-                    __HAL_RCC_TIM4_CLK_ENABLE();
-                    HAL_NVIC_SetPriority(TIM4_IRQn, 0, 0);
-                    HAL_NVIC_EnableIRQ(TIM4_IRQn);
-                    break;
-
-                default:
-                    timer_hal_error_handler(&ret);
-                    break;
-                }
-
+           if (handle[i].periph == TIM1)
+           {
+                __HAL_RCC_TIM1_CLK_ENABLE();
+                HAL_NVIC_SetPriority(TIM1_BRK_IRQn, 0, 0);
+                HAL_NVIC_EnableIRQ(TIM1_BRK_IRQn);
+                HAL_NVIC_SetPriority(TIM1_UP_IRQn, 0, 0);
+                HAL_NVIC_EnableIRQ(TIM1_UP_IRQn);
+                HAL_NVIC_SetPriority(TIM1_TRG_COM_IRQn, 0, 0);
+                HAL_NVIC_EnableIRQ(TIM1_TRG_COM_IRQn);
+                HAL_NVIC_SetPriority(TIM1_CC_IRQn, 0, 0);
+                HAL_NVIC_EnableIRQ(TIM1_CC_IRQn);
+           }
+           else if (handle[i].periph == TIM2)
+           {
+                __HAL_RCC_TIM2_CLK_ENABLE();
+                HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
+                HAL_NVIC_EnableIRQ(TIM2_IRQn);
+           }
+           else if (handle[i].periph == TIM3)
+           {
+                __HAL_RCC_TIM3_CLK_ENABLE();
+                HAL_NVIC_SetPriority(TIM3_IRQn, 0, 0);
+                HAL_NVIC_EnableIRQ(TIM3_IRQn);
+           }
+           else if (handle[i].periph == TIM4)
+           {
+                __HAL_RCC_TIM4_CLK_ENABLE();
+                HAL_NVIC_SetPriority(TIM4_IRQn, 0, 0);
+                HAL_NVIC_EnableIRQ(TIM4_IRQn);
+           }       
+           else
+           {
+               timer_hal_error_handler(&ret);
+           }
 
             if (HAL_TIM_Base_Init(&tim[i]) != HAL_OK)
             {
@@ -213,7 +209,7 @@ void Timer_NotStd_hal_pulse_disable(timer_hal_conf_t handle)
 // TIM_OCMODE_FORCED_ACTIVE      
 // TIM_OCMODE_FORCED_INACTIVE    
 
-timer_hal_err_t Timer_hal_OC_init(timer_hal_oc_t *handle)
+timer_hal_err_t Timer_hal_OC_init(const timer_hal_oc_conf_t *handle)
 {
     timer_hal_err_t ret = TIMER_HAL_ERR_OK;
     oc_hal_cfg_buff = handle;
@@ -225,7 +221,7 @@ timer_hal_err_t Timer_hal_OC_init(timer_hal_oc_t *handle)
     
     for (int i = 0; i < OC_TOTAL_ISTANCE; i++)
     {
-        if (handle[i].tmr != CONF_OC_ENUM_UNUSED)
+        if (handle[i].tmr != CONF_TIMER_ENUM_UNUSED)
         {
             if (HAL_TIM_OC_Init(&tim[i]) != HAL_OK)
             {
@@ -245,12 +241,12 @@ timer_hal_err_t Timer_hal_OC_init(timer_hal_oc_t *handle)
             sConfigOC[i].OCPolarity = handle[i].pol;
             
             sConfigOC[i].OCFastMode = TIM_OCFAST_DISABLE;
-            if (HAL_TIM_OC_ConfigChannel(&tim[i], &sConfigOC[i,  handle[i].channel) != HAL_OK)
+            if (HAL_TIM_OC_ConfigChannel(&tim[i], &sConfigOC[i],  handle[i].channel) != HAL_OK)
             {
                 timer_hal_error_handler(&ret);
             }
 
-            if (handle[i].interrupt == TIMER_INT_ON)
+            if (handle[i].interrupt == TIMER_HAL_INT_ON)
             {
                 switch (handle[i].channel)
                 {
@@ -271,15 +267,21 @@ timer_hal_err_t Timer_hal_OC_init(timer_hal_oc_t *handle)
                     break;
                 }
 
-                if (handle[i].periph == TIM1)
-                    IntHal_vector_register(timer1_isr, TIM1_IRQHandler_num);
-                else if (handle[i].periph == TIM2)
-                    IntHal_vector_register(timer2_isr, TIM2_IRQHandler_num);                
-                else if (handle[i].periph == TIM3)
-                    IntHal_vector_register(timer3_isr, TIM3_IRQHandler_num);                
-                else if (handle[i].periph == TIM4)
-                    IntHal_vector_register(timer4_isr, TIM4_IRQHandler_num);                
-                else {}
+                for (int j = 0; j < TIMER_TOTAL_INSTANCE; i++)
+                {
+                    if (timer_hal_cfg_buff[j].tmr == handle[i].tmr)
+                    {
+                         if (timer_hal_cfg_buff[j].periph == TIM1)
+                             IntHal_vector_register(timer1_isr, TIM1_IRQHandler_num);
+                         else if (timer_hal_cfg_buff[j].periph == TIM2)
+                             IntHal_vector_register(timer2_isr, TIM2_IRQHandler_num);                
+                         else if (timer_hal_cfg_buff[j].periph == TIM3)
+                             IntHal_vector_register(timer3_isr, TIM3_IRQHandler_num);                
+                         else if (timer_hal_cfg_buff[j].periph == TIM4)
+                             IntHal_vector_register(timer4_isr, TIM4_IRQHandler_num);                
+                         else {}
+                    }
+                }
             }
         }
     }
@@ -307,40 +309,22 @@ uint32_t Timer_hal_OC_get(conf_oc_e oc)
             return __HAL_TIM_GET_COMPARE(&tim[i], oc_hal_cfg_buff[i].channel);
         }
     }
+    return -1;
 }
 
-void Timer_hal_OC_period(conf_oc_e oc)
+void Timer_hal_OC_period(conf_oc_e oc, uint32_t val)
 {
     for (int i = 0; i<CONF_OC_ENUM_UNUSED; i++)
     {
         if (oc_hal_cfg_buff[i].oc_enum == oc)
         {
-            // If kept internal teh user might be unaware of the implication of other channels used, leadin to not synch
-            return __HAL_TIM_GET_COMPARE(&tim[i], oc_hal_cfg_buff[i].channel);
+        	__HAL_TIM_SET_COMPARE(&tim[i], oc_hal_cfg_buff[i].channel, val);
         }
     }
 }
 
 
-void Timer_hal_OC_period(timer_hal_oc_t *handle, conf_oc_e oc, uint32_t val)
-{
-    for (int i = 0; i<CONF_OC_ENUM_UNUSED; i++)
-    {
-        if (oc_hal_cfg_buff[i].oc_enum == oc)
-        {
-            __HAL_TIM_SET_COMPARE(&tim[i], oc_hal_cfg_buff[i].channel, val);
-             //                     (__HAL_TIM_GET_COMPARE(&tim[handle->periph], timer_ch_translate[handle->channel])+val)
-               //                   );
-            //__HAL_TIM_DISABLE(&tim[handle->periph]);
-            //__HAL_TIM_SET_COMPARE(&tim[handle->periph], timer_ch_translate[handle->channel],
-              //                   (__HAL_TIM_GET_COUNTER(&tim[handle->periph])+val));
-            //__HAL_TIM_ENABLE(&tim[handle->periph]);     
-        }
-    }             
-}           
-
-
-timer_hal_err_t Timer_hal_PWM_init(timer_hal_pwm_t *handle)
+timer_hal_err_t Timer_hal_PWM_init(const timer_hal_pwm_conf_t *handle)
 {
     timer_hal_err_t ret = TIMER_HAL_ERR_OK;
     pwm_hal_cfg_buff = handle;
@@ -362,19 +346,11 @@ timer_hal_err_t Timer_hal_PWM_init(timer_hal_pwm_t *handle)
            {
                timer_hal_error_handler(&ret);
            }
-           if (handle->mode == TIMER_PWM)
-               sConfigOC[i].OCMode = TIM_OCMODE_PWM1; // default, change with LL
-           else if (handle->mode == TIMER_PWM_INV)
-               sConfigOC[i].OCMode = TIM_OCMODE_PWM2; // default, change with LL
-           else
-           {
-               timer_hal_error_handler(&ret);
-           }
+
+           sConfigOC[i].OCMode = handle->mode; // default, change with LL
+
            sConfigOC[i].Pulse = 0;
-           if (handle->pol == TIMER_POL_HIGH)
-               sConfigOC[i].OCPolarity = TIM_OCPOLARITY_HIGH;
-           if (handle->pol == TIMER_POL_LOW)
-               sConfigOC[i].OCPolarity = TIM_OCPOLARITY_LOW;
+           sConfigOC[i].OCPolarity = handle->pol;
            sConfigOC[i].OCFastMode = TIM_OCFAST_DISABLE;
            if (HAL_TIM_PWM_ConfigChannel(&tim[i], &sConfigOC[i], handle[i].channel) != HAL_OK)
            {
@@ -402,7 +378,7 @@ void Timer_hal_PWM_start(conf_pwm_e pwm)
 }
 
 
-void Timer_hal_PWM_DC(timer_hal_pwm_t *handle, conf_pwm_e pwm, uint32_t val)
+void Timer_hal_PWM_DC(const timer_hal_pwm_conf_t *handle, conf_pwm_e pwm, uint32_t val)
 {
     #if 0
     if (handle->pwm_enum == pwm) // in this way can also passed the pointer to the right handler only for faster assignment

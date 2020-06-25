@@ -24,12 +24,13 @@
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
-gpio_hal_cfg_t* gpio_prova_conf;
-timer_hal_cfg_t* timer_prova_conf;
+const gpio_hal_cfg_t*  gpio_prova_conf;
+const timer_hal_conf_t* timer_prova_conf;
+const timer_hal_oc_conf_t* oc_prova_conf;
 
-void prova_isr_app(conf_timer_e timer)
+void prova_isr_app(timer_hal_irq_src_t timer)
 {
-	if (timer == TIMER_4) // livello applicativo, puo avere qualisasi nome
+	if (timer == TIMER_HAL_CH4) // livello applicativo, puo avere qualisasi nome
 	{
 
 		Gpio_hal_set_value(DEBUG_LED, GPIO_LOW);  // stesso per gpio, puo avere qualisasi nome
@@ -61,8 +62,13 @@ int main(void)
 
 	// //tmr start
     timer_prova_conf = Timer_hal_conf_get();
+    oc_prova_conf = Timer_hal_OC_conf_get();
 	Timer_hal_init(timer_prova_conf);
 	Timer_hal_set_ISR_cb(TIMER_4, prova_isr_app);
+	Timer_hal_OC_init(oc_prova_conf);
+
+	IntHal_enable_global_interrupt();
+	Timer_hal_OC_start(OC_CHANNEL_TEST_1);
 	// //pwm
 	// Timer_hal_PWM_init(&timer_hal_test_conf[0]);
 	// Timer_hal_PWM_start(&timer_hal_test_conf[0]);
@@ -76,7 +82,7 @@ int main(void)
 	//Timer_hal_OC_period(&timer_hal_test_conf[1], 1500);
 
 //int enable
-	IntHal_enable_global_interrupt();
+
 
 	for(;;);
 }

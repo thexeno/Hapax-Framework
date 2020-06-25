@@ -35,7 +35,7 @@ const gpio_hal_cfg_t gpio_hal_conf[GPIO_TOTAL_PIN] =
 
 const gpio_hal_cfg_t * const Gpio_hal_conf_get(void)
 {
-    return (const *)(gpio_hal_conf/*[0]*/);
+    return (gpio_hal_conf/*[0]*/);
 }
 
 base_t Gpio_hal_conf_get_size(void)

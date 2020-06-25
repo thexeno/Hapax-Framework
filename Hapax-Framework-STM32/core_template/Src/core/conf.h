@@ -2,8 +2,8 @@
 #define CONF_H
 
 #include "sys_types.h"
-#include "gpio_hal.h"
-#include "timer_hal.h"
+//#include "gpio_hal.h"
+//#include "timer_hal.h"
 
 // cosi sei obbligato a dichiarare per cosa hai incluso
 typedef enum
@@ -39,8 +39,5 @@ typedef enum
 	CONF_OC_ENUM_UNUSED
 } conf_oc_e;
 
-const timer_hal_pwm_conf_t * const Timer_hal_PWM_conf_get(void);
-const timer_hal_oc_conf_t * const Timer_hal_OC_conf_get(void);
-const timer_hal_conf_t * const Timer_hal_conf_get(void);
 
 #endif

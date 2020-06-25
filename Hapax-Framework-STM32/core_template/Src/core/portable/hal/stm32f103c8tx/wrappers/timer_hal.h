@@ -11,7 +11,7 @@ typedef uint32_t      timer_hal_pwm_mode_t;
 typedef uint32_t      timer_hal_pwm_pol_t;
 typedef uint32_t      timer_hal_oc_pol_t;
 typedef uint32_t      timer_hal_period_t;
-typedef uint32_t      timer_hal_channel_t
+typedef uint32_t      timer_hal_channel_t;
 
 typedef TIM_TypeDef*  timer_hal_periph_t;
 
@@ -20,7 +20,7 @@ typedef TIM_TypeDef*  timer_hal_periph_t;
 #define OC_TOTAL_ISTANCE CONF_OC_ENUM_UNUSED // situation can get very custom and numerous, so might be better to allocate only the really used ones
 
 
-
+// To keep separation from hardware in application code which uses the callback
 typedef enum
 {
 	TIMER_HAL_CH1 = 0,
@@ -61,18 +61,18 @@ typedef struct
 	conf_timer_e tmr;    // Defined in the application specific enumeration header (conf.h). Will not compile if not properly configured
 	timer_hal_channel_t channel;
     timer_hal_pwm_mode_t mode;
-	timer_hal_pol_t pol;
+    timer_hal_pwm_pol_t pol;
 	timer_hal_int_t interrupt;
 } timer_hal_pwm_conf_t;
 
 // OC configuration structure. The <conf_timer_e> indicates it relies on the basic timer, hence must be configured first.
 typedef struct
 {
-	conf_oc_e pwm_enum;    // Defined in the application specific enumeration header (conf.h). Will not compile if not properly configured
+	conf_oc_e oc_enum;    // Defined in the application specific enumeration header (conf.h). Will not compile if not properly configured
 	conf_timer_e tmr;      // Defined in the application specific enumeration header (conf.h). Will not compile if not properly configured
 	timer_hal_channel_t channel;
     timer_hal_oc_mode_t mode;
-	timer_hal_pol_t pol;
+	timer_hal_oc_pol_t pol;
 	timer_hal_int_t interrupt;
 } timer_hal_oc_conf_t;
 
@@ -80,28 +80,30 @@ typedef struct
  * Declared in a conf.c file according to the configuration desired,
  * enumerated in in a designated application defines conf.h header.
  */
-extern const timer_hal_conf_t * const Timer_hal_conf_get(void);
-extern const timer_hal_pwm_conf_t * const Timer_hal_PWM_conf_get(void);
+const timer_hal_pwm_conf_t * const Timer_hal_PWM_conf_get(void);
+const timer_hal_oc_conf_t * const Timer_hal_OC_conf_get(void);
+const timer_hal_conf_t * const Timer_hal_conf_get(void);
 
 // Initialisation functions
-timer_hal_err_t Timer_hal_init(timer_hal_conf_t *handle);
-timer_hal_err_t Timer_hal_PWM_init(timer_hal_pwm_t *handle);
-timer_hal_err_t Timer_hal_OC_init(timer_hal_conf_t *handle);
+timer_hal_err_t Timer_hal_init(const timer_hal_conf_t *handle);
 
-// Timer control functions
+
+// PWM functions
+timer_hal_err_t Timer_hal_PWM_init(const timer_hal_pwm_conf_t *handle);
 void Timer_hal_PWM_start(conf_pwm_e pwm);
-void Timer_hal_OC_start(timer_hal_conf_t *handle);
+void Timer_hal_PWM_DC(const timer_hal_pwm_conf_t *handle, conf_pwm_e pwm, uint32_t val);
 
-// Timing functions
-void Timer_hal_OC_period(timer_hal_conf_t *handle, uint32_t val);
-void Timer_hal_PWM_DC(timer_hal_pwm_t *handle, conf_pwm_e pwm, uint32_t val);
-uint32_t Timer_hal_OC_get(timer_hal_conf_t *handle);
+// Output Compare functions
+timer_hal_err_t Timer_hal_OC_init(const timer_hal_oc_conf_t *handle);
+void Timer_hal_OC_start(conf_oc_e oc);
+uint32_t Timer_hal_OC_get(conf_oc_e oc);
+void Timer_hal_OC_period(conf_oc_e oc, uint32_t val);
 
 // Not MUC standard functions (i.e. you hardly find those in cheaper MCU families, TAKE CARE when writing portable code)
 timer_hal_err_t Timer_NotStd_hal_pulse_enable(timer_hal_conf_t *handle);
 timer_hal_err_t Timer_NotStd_hal_pulse_disable(timer_hal_conf_t *handle);
 
-void Timer_hal_set_ISR_cb(conf_timer_e tmr, void (*f_pt)(timer_hal_channel_t));
+void Timer_hal_set_ISR_cb(conf_timer_e tmr, void (*f_pt)(timer_hal_irq_src_t));
 
 
 #endif
