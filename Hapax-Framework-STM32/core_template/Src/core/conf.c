@@ -56,7 +56,7 @@ const timer_hal_conf_t timer_test[TIMER_TOTAL_INSTANCE] =
 {
     {CONF_TIMER_ENUM_UNUSED,    TIM1,   1,    0xffff},
     {CONF_TIMER_ENUM_UNUSED,    TIM2,   1,    0xffff},
-    {TIMER_3,                   TIM3,   1,    0xffff},
+    {TIMER_3,                   TIM3,   250,    0xffff},
     {TIMER_4,                   TIM4,   1,    0xffff}
 };
 

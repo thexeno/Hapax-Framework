@@ -32,12 +32,12 @@ const timer_hal_oc_conf_t* oc_prova_conf;
 
 void prova_isr_app(timer_hal_irq_src_t timer)
 {
-	if (timer == TIMER_HAL_CH4) // livello applicativo, puo avere qualisasi nome
+	if (timer == TIMER_HAL_CH1) // livello applicativo, puo avere qualisasi nome
 	{
 
 		Gpio_hal_set_value(DEBUG_LED, GPIO_LOW);  // stesso per gpio, puo avere qualisasi nome
 
-		//Timer_hal_OC_period(&timer_hal_test_conf[1], (uint16_t)(Timer_hal_OC_get(&timer_hal_test_conf[1])+1500));
+		Timer_hal_OC_period(OC_CHANNEL_TEST_1, (uint16_t)(Timer_hal_OC_get(OC_CHANNEL_TEST_1)+1500));
 		Gpio_hal_set_value(DEBUG_LED, GPIO_HIGH);
 	}
 	else
@@ -68,6 +68,7 @@ int main(void)
 	Timer_hal_init(timer_prova_conf);
 	Timer_hal_set_ISR_cb(TIMER_4, prova_isr_app);
 	Timer_hal_OC_init(oc_prova_conf);
+	Timer_hal_OC_period(OC_CHANNEL_TEST_1, 0xf055);
 
 	IntHal_enable_global_interrupt();
 	Timer_hal_OC_start(OC_CHANNEL_TEST_1);
