@@ -29,6 +29,7 @@
 const gpio_hal_cfg_t*  gpio_prova_conf;
 const timer_hal_conf_t* timer_prova_conf;
 const timer_hal_oc_conf_t* oc_prova_conf;
+const timer_hal_pwm_conf_t* pwm_prova_conf;
 
 void prova_isr_app(timer_hal_irq_src_t timer)
 {
@@ -73,7 +74,8 @@ int main(void)
 	IntHal_enable_global_interrupt();
 	Timer_hal_OC_start(OC_CHANNEL_TEST_1);
 	// //pwm
-	// Timer_hal_PWM_init(&timer_hal_test_conf[0]);
+    pwm_prova_conf = Timer_hal_PWM_conf_get();
+	Timer_hal_PWM_init(pwm_prova_conf);
 	// Timer_hal_PWM_start(&timer_hal_test_conf[0]);
 	// Timer_hal_PWM_DC(&timer_hal_test_conf[0], 1500);
 	// // OC

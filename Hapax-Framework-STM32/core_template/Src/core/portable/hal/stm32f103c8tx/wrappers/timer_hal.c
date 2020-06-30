@@ -403,27 +403,39 @@ timer_hal_err_t Timer_hal_PWM_init(const timer_hal_pwm_conf_t *handle)
     {
         return TIMER_HAL_ERR_NO_TIMER;
     }
+    
     for (int i = 0; i < TIMER_TOTAL_INSTANCE; i++)
     {
+        
         if (handle[i].tmr != CONF_TIMER_ENUM_UNUSED)
         {
-            if (HAL_TIM_PWM_Init(&tim[i]) != HAL_OK)
+            int j = 0;
+            while (timer_hal_cfg_buff[j].tmr != handle[i].tmr)
+            {
+                // Find the right index in the timer conf, so can be used to
+                // index the tim[] for the OC conf. Works based on the fact oc conf is always a subset of
+                // timer conf for hardware reasons.
+                if (j > TIMER_TOTAL_INSTANCE)
+                    timer_hal_error_handler(&ret);
+                j++;
+            }
+            if (HAL_TIM_PWM_Init(&tim[j]) != HAL_OK)
             {
                 timer_hal_error_handler(&ret);
             }
-            sMasterConfig[i].MasterOutputTrigger = TIM_TRGO_RESET;
-            sMasterConfig[i].MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-            if (HAL_TIMEx_MasterConfigSynchronization(&tim[i], &sMasterConfig[i]) != HAL_OK)
+            sMasterConfig[j].MasterOutputTrigger = TIM_TRGO_RESET;
+            sMasterConfig[j].MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+            if (HAL_TIMEx_MasterConfigSynchronization(&tim[j], &sMasterConfig[j]) != HAL_OK)
             {
                 timer_hal_error_handler(&ret);
             }
 
-            sConfigOC[i].OCMode = handle->mode; // default, change with LL
+            sConfigOC[j].OCMode = handle[i].mode; // default, change with LL
 
-            sConfigOC[i].Pulse = 0;
-            sConfigOC[i].OCPolarity = handle->pol;
-            sConfigOC[i].OCFastMode = TIM_OCFAST_DISABLE;
-            if (HAL_TIM_PWM_ConfigChannel(&tim[i], &sConfigOC[i], handle[i].channel) != HAL_OK)
+            sConfigOC[j].Pulse = 0;
+            sConfigOC[j].OCPolarity = handle[i].pol;
+            sConfigOC[j].OCFastMode = TIM_OCFAST_DISABLE;
+            if (HAL_TIM_PWM_ConfigChannel(&tim[j], &sConfigOC[j], handle[i].channel) != HAL_OK)
             {
                 timer_hal_error_handler(&ret);
             }
@@ -436,68 +448,53 @@ void Timer_hal_PWM_start(conf_pwm_e pwm)
 {
     for (int i = 0; i < CONF_PWM_ENUM_UNUSED; i++)
     {
+        int j = 0;
+        while (timer_hal_cfg_buff[j].tmr != pwm_hal_cfg_buff[i].tmr)
+        {
+            if (j > TIMER_TOTAL_INSTANCE)
+            {
+                timer_hal_err_t *ret;          // for compliance
+                timer_hal_error_handler(&ret); // for further error implementation
+            }
+            j++;
+        }
         if (pwm_hal_cfg_buff[i].pwm_enum == pwm)
         {
-            HAL_TIM_PWM_Start(&tim[i], pwm_hal_cfg_buff[i].channel);
+            HAL_TIM_PWM_Start(&tim[j], pwm_hal_cfg_buff[i].channel);
             break;
         }
     }
 }
 
-void Timer_hal_PWM_DC(const timer_hal_pwm_conf_t *handle, conf_pwm_e pwm, uint32_t val)
+void Timer_hal_PWM_DC(conf_pwm_e oc, uint32_t val)
 {
-#if 0
-    if (handle->pwm_enum == pwm) // in this way can also passed the pointer to the right handler only for faster assignment
-    {
-        switch (handle->channel)
+        int i = 0;
+        // search the OC conf
+        while (pwm_hal_cfg_buff[i].pwm_enum != oc)
         {
-            case TIM_CHANNEL_1:
-            LL_TIM_OC_SetCompareCH1(tim[i].Instance, val);
-            break;
-            case TIM_CHANNEL_2:
-            LL_TIM_OC_SetCompareCH2(tim[i].Instance, val);
-            break;
-            case TIM_CHANNEL_3:
-            LL_TIM_OC_SetCompareCH3(tim[i].Instance, val);
-            break;
-            case TIM_CHANNEL_4:
-            LL_TIM_OC_SetCompareCH4(tim[i].Instance, val);
-            break;   
-            default:
-            break;
-        }       
-    }
-    else // the argument passed was not the exact handle, and must be searched instead
-    {
-#endif
-    for (int i = 0; i < CONF_PWM_ENUM_UNUSED; i++)
-    {
-        if (pwm_hal_cfg_buff[i].pwm_enum == pwm)
-        {
-            switch (pwm_hal_cfg_buff[i].channel)
+            if (i > CONF_PWM_ENUM_UNUSED)
             {
-            case TIM_CHANNEL_1:
-                LL_TIM_OC_SetCompareCH1(tim[i].Instance, val);
-                break;
-            case TIM_CHANNEL_2:
-                LL_TIM_OC_SetCompareCH2(tim[i].Instance, val);
-                break;
-            case TIM_CHANNEL_3:
-                LL_TIM_OC_SetCompareCH3(tim[i].Instance, val);
-                break;
-            case TIM_CHANNEL_4:
-                LL_TIM_OC_SetCompareCH4(tim[i].Instance, val);
-                break;
-            default:
-                //timer_hal_error_handler((timer_hal_err_t*)void);
-                break;
+                timer_hal_err_t *ret;          // for compliance
+                timer_hal_error_handler(&ret); // for further error implementation
             }
+            i++;
         }
-    }
-#if 0
-    }
-#endif
+        
+        int j = 0;
+        // search the corresponding timer
+        while (pwm_hal_cfg_buff[i].tmr != timer_hal_cfg_buff[j].tmr)
+        {
+            if (j > CONF_TIMER_ENUM_UNUSED)
+            {
+                timer_hal_err_t *ret;          // for compliance
+                timer_hal_error_handler(&ret); // for further error implementation
+            }
+            j++;
+        }
+        __HAL_TIM_SET_COMPARE(&tim[j], pwm_hal_cfg_buff[i].channel, val);
 }
+
+
 
 // perc*ARR / 100 = dc-val
 //void Timer_NotStd_hal_pulse_duty(timer_hal_func_t *handle, uint32_t duty)

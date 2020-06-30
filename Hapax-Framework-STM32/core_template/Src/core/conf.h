@@ -12,6 +12,7 @@ typedef enum
 	TIMER4_TEST_PIN0,
 	MCO_PIN,
 	TIMER4_TEST_PIN1,
+    PWM_PIN,
     CONF_GPIO_ENUM_UNUSED
 } conf_gpio_e;
 

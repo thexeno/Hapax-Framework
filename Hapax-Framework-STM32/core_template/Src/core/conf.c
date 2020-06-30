@@ -28,9 +28,10 @@ const gpio_hal_cfg_t gpio_hal_conf[GPIO_TOTAL_PIN] =
 {
     //   hw pin,            pin mode,    hw port set,              after-init state,      additional options i.e.: pull modes
   { DEBUG_LED,                  GPIOC,     GPIO_PIN_13,          GPIO_MODE_OUTPUT_PP,    GPIO_PIN_SET,         GPIO_NOPULL}, 
-  { CONF_GPIO_ENUM_UNUSED,      GPIOB,     GPIO_PIN_6,           GPIO_MODE_AF_PP,        GPIO_PIN_RESET,       GPIO_NOPULL},
+  { PWM_PIN,                    GPIOB,     GPIO_PIN_6,           GPIO_MODE_OUTPUT_PP,        GPIO_PIN_RESET,       GPIO_NOPULL},
   { MCO_PIN,                    GPIOA,     GPIO_PIN_8,           GPIO_MODE_AF_PP,        GPIO_PIN_RESET,       GPIO_NOPULL},
-  { CONF_GPIO_ENUM_UNUSED,      GPIOB,     GPIO_PIN_9,           GPIO_MODE_AF_PP,        GPIO_PIN_RESET,       GPIO_NOPULL}
+  { CONF_GPIO_ENUM_UNUSED,      GPIOB,     GPIO_PIN_9,           GPIO_MODE_AF_PP,        GPIO_PIN_RESET,       GPIO_NOPULL},
+  { CONF_GPIO_ENUM_UNUSED,      GPIOB,     GPIO_PIN_9,           GPIO_MODE_AF_PP,        GPIO_PIN_RESET,       GPIO_NOPULL},
 };
 
 const gpio_hal_cfg_t * const Gpio_hal_conf_get(void)

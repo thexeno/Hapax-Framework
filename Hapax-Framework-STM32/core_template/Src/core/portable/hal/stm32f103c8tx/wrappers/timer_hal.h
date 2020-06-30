@@ -91,7 +91,7 @@ timer_hal_err_t Timer_hal_init(const timer_hal_conf_t *handle);
 // PWM functions
 timer_hal_err_t Timer_hal_PWM_init(const timer_hal_pwm_conf_t *handle);
 void Timer_hal_PWM_start(conf_pwm_e pwm);
-void Timer_hal_PWM_DC(const timer_hal_pwm_conf_t *handle, conf_pwm_e pwm, uint32_t val);
+void Timer_hal_PWM_DC(conf_pwm_e oc, uint32_t val);
 
 // Output Compare functions
 timer_hal_err_t Timer_hal_OC_init(const timer_hal_oc_conf_t *handle);
