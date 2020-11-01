@@ -28,7 +28,7 @@ const gpio_hal_cfg_t gpio_hal_conf[GPIO_TOTAL_PIN] =
 {
     //   hw pin,            pin mode,    hw port set,              after-init state,      additional options i.e.: pull modes
   { DEBUG_LED,                  GPIOC,     GPIO_PIN_13,          GPIO_MODE_OUTPUT_PP,    GPIO_PIN_SET,         GPIO_NOPULL}, 
-  { PWM_PIN,                    GPIOB,     GPIO_PIN_6,           GPIO_MODE_OUTPUT_PP,        GPIO_PIN_RESET,       GPIO_NOPULL},
+  { PWM_PIN,                    GPIOA,     GPIO_PIN_6,           GPIO_MODE_AF_PP,        GPIO_PIN_RESET,       GPIO_NOPULL},
   { MCO_PIN,                    GPIOA,     GPIO_PIN_8,           GPIO_MODE_AF_PP,        GPIO_PIN_RESET,       GPIO_NOPULL},
   { CONF_GPIO_ENUM_UNUSED,      GPIOB,     GPIO_PIN_9,           GPIO_MODE_AF_PP,        GPIO_PIN_RESET,       GPIO_NOPULL},
   { CONF_GPIO_ENUM_UNUSED,      GPIOB,     GPIO_PIN_9,           GPIO_MODE_AF_PP,        GPIO_PIN_RESET,       GPIO_NOPULL},
@@ -57,18 +57,18 @@ const timer_hal_conf_t timer_test[TIMER_TOTAL_INSTANCE] =
 {
     {CONF_TIMER_ENUM_UNUSED,    TIM1,   1,    0xffff},
     {CONF_TIMER_ENUM_UNUSED,    TIM2,   1,    0xffff},
-    {TIMER_3,                   TIM3,   250,    0xffff},
+    {TIMER_3,                   TIM3,   250,    0x00ff},
     {TIMER_4,                   TIM4,   1,    0xffff}
 };
 
-const timer_hal_pwm_conf_t  pwm_test[PWM_TOTAL_ISTANCE] = 
+const timer_hal_pwm_conf_t  pwm_test[PWM_TOTAL_INSTANCE] =
 {
     {PWM_CHANNEL_TEST_1, TIMER_3,   TIM_CHANNEL_1, TIM_OCMODE_PWM1,   TIM_OCPOLARITY_HIGH,     TIMER_HAL_INT_OFF}
     //{PWM_CHANNEL_TEST_2, TIMER_4,   TIM_CHANNEL_4, TMR_PWM,    TIM_OCPOLARITY_LOW,      TMR_INT_OFF},
     //{PWM_CHANNEL_TEST_3, TIMER_3,   TIM_CHANNEL_4, TMR_PWM,    TIM_OCPOLARITY_HIGH,     TMR_INT_OFF}
 };
 
-const timer_hal_oc_conf_t  oc_test[OC_TOTAL_ISTANCE] = 
+const timer_hal_oc_conf_t  oc_test[OC_TOTAL_INSTANCE] =
 {
     {OC_CHANNEL_TEST_1, TIMER_4,   TIM_CHANNEL_1, TIM_OCMODE_TIMING,    TIM_OCPOLARITY_HIGH,     TIMER_HAL_INT_ON}
 };

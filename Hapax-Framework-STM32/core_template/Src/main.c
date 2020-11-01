@@ -38,7 +38,7 @@ void prova_isr_app(timer_hal_irq_src_t timer)
 
 		Gpio_hal_set_value(DEBUG_LED, GPIO_LOW);  // stesso per gpio, puo avere qualisasi nome
 
-		Timer_hal_OC_period(OC_CHANNEL_TEST_1, (uint16_t)(Timer_hal_OC_get(OC_CHANNEL_TEST_1)+1500));
+		Timer_hal_OC_period(OC_CHANNEL_TEST_1, (uint16_t)(Timer_hal_OC_get(OC_CHANNEL_TEST_1)+8500));
 		Gpio_hal_set_value(DEBUG_LED, GPIO_HIGH);
 	}
 	else
@@ -69,7 +69,7 @@ int main(void)
 	Timer_hal_init(timer_prova_conf);
 	Timer_hal_set_ISR_cb(TIMER_4, prova_isr_app);
 	Timer_hal_OC_init(oc_prova_conf);
-	Timer_hal_OC_period(OC_CHANNEL_TEST_1, 0xf055);
+	Timer_hal_OC_period(OC_CHANNEL_TEST_1, 0xff55);
 
 	IntHal_enable_global_interrupt();
 	Timer_hal_OC_start(OC_CHANNEL_TEST_1);
@@ -77,10 +77,10 @@ int main(void)
     pwm_prova_conf = Timer_hal_PWM_conf_get();
 	Timer_hal_PWM_init(pwm_prova_conf);
 	// Timer_hal_PWM_start(&timer_hal_test_conf[0]);
-	// Timer_hal_PWM_DC(&timer_hal_test_conf[0], 1500);
+	Timer_hal_PWM_DC(PWM_CHANNEL_TEST_1, 95);
 	// // OC
 	// Timer_hal_OC_init(&timer_hal_test_conf[1]);
-	// Timer_hal_OC_start(&timer_hal_test_conf[1]);
+	Timer_hal_PWM_start(PWM_CHANNEL_TEST_1);
 	// // one pulse
 	
 

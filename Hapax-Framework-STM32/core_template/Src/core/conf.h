@@ -28,8 +28,6 @@ typedef enum
 typedef enum
 {
 	PWM_CHANNEL_TEST_1 = 0,
-	PWM_CHANNEL_TEST_2,
-	PWM_CHANNEL_TEST_3,
 	CONF_PWM_ENUM_UNUSED
 } conf_pwm_e;
 
@@ -40,5 +38,11 @@ typedef enum
 	CONF_OC_ENUM_UNUSED
 } conf_oc_e;
 
+
+typedef enum
+{
+	SPI_TEST_0 = 0,
+	CONF_SPI_ENUM_UNUSED
+} conf_spi_e;
 
 #endif

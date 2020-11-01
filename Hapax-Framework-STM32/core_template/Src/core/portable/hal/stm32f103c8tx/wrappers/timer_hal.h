@@ -16,8 +16,8 @@ typedef uint32_t      timer_hal_channel_t;
 typedef TIM_TypeDef*  timer_hal_periph_t;
 
 #define TIMER_TOTAL_INSTANCE 4
-#define PWM_TOTAL_ISTANCE CONF_PWM_ENUM_UNUSED // situation can get very custom and numerous, so might be better to allocate only the really used ones
-#define OC_TOTAL_ISTANCE CONF_OC_ENUM_UNUSED // situation can get very custom and numerous, so might be better to allocate only the really used ones
+#define PWM_TOTAL_INSTANCE CONF_PWM_ENUM_UNUSED // situation can get very custom and numerous, so might be better to allocate only the really used ones
+#define OC_TOTAL_INSTANCE CONF_OC_ENUM_UNUSED // situation can get very custom and numerous, so might be better to allocate only the really used ones
 
 
 // To keep separation from hardware in application code which uses the callback

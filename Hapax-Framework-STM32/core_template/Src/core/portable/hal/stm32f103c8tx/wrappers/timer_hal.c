@@ -242,7 +242,7 @@ timer_hal_err_t Timer_hal_OC_init(const timer_hal_oc_conf_t *handle)
         return TIMER_HAL_ERR_NO_TIMER;
     }
 
-    for (int i = 0; i < OC_TOTAL_ISTANCE; i++)
+    for (int i = 0; i < OC_TOTAL_INSTANCE; i++)
     {
         if (handle[i].tmr != CONF_TIMER_ENUM_UNUSED)
         {
@@ -404,7 +404,7 @@ timer_hal_err_t Timer_hal_PWM_init(const timer_hal_pwm_conf_t *handle)
         return TIMER_HAL_ERR_NO_TIMER;
     }
     
-    for (int i = 0; i < TIMER_TOTAL_INSTANCE; i++)
+    for (int i = 0; i < PWM_TOTAL_INSTANCE; i++)
     {
         
         if (handle[i].tmr != CONF_TIMER_ENUM_UNUSED)

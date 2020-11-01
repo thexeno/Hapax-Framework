@@ -107,7 +107,7 @@ void Gpio_hal_init(const gpio_hal_cfg_t* handle)
 		GPIO_InitStruct.Mode = handle[i].mode_io;
 		GPIO_InitStruct.Pin = handle[i].pin;
 		GPIO_InitStruct.Pull = handle[i].mode_pull; 
-		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW; // metti API per gestire funzioni particolari
+		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;//GPIO_SPEED_FREQ_LOW; // metti API per gestire funzioni particolari
 		HAL_GPIO_Init(handle[i].port, &GPIO_InitStruct);
 	}
 }
