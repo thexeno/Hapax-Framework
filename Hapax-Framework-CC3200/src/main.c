@@ -21,6 +21,8 @@
 #include "hal.h"
 #include "gpio_hal.h"
 
+#warning "USE_FREERTOS not defined, ISR will not work with this"
+
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
