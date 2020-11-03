@@ -1,6 +1,8 @@
 #ifndef CONF_H
 #define CONF_H
 
+#include "hal.h"
+/*
 #include "sys_types.h"
 //#include "gpio_hal.h"
 //#include "timer_hal.h"
@@ -14,6 +16,12 @@
 #include "rom.h"
 #include "rom_map.h"
 // cosi sei obbligato a dichiarare per cosa hai incluso
+ *
+ *
+ */
+
+
+
 typedef enum
 {
 	DEBUG_LED = 0,

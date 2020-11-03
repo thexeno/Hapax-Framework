@@ -42,7 +42,7 @@ typedef struct
 } gpio_hal_cfg_t;
 //#define GPIO_TOTAL_CONF 
 
-const gpio_hal_cfg_t * const Gpio_hal_conf_get(void);
+const gpio_hal_cfg_t*  Gpio_hal_conf_get(void);
 base_t Gpio_hal_conf_get_size(void);
 
 void Gpio_hal_init(const gpio_hal_cfg_t* handle);

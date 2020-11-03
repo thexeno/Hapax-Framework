@@ -26,9 +26,54 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>src/core/portable/hal/cc3200/startup_ccs.c</name>
+			<name>src/core/os/FreeRTOS/MemMang</name>
+			<type>2</type>
+			<locationURI>FREERTOS_INSTALL_DIR/FreeRTOS/Source/portable/MemMang</locationURI>
+		</link>
+		<link>
+			<name>src/core/os/FreeRTOS/croutine.c</name>
 			<type>1</type>
-			<locationURI>PARENT-4-PROJECT_LOC/ti/CC3200SDK_1.4.0/cc3200-sdk/example/common/startup_ccs.c</locationURI>
+			<locationURI>FREERTOS_INSTALL_DIR/FreeRTOS/Source/croutine.c</locationURI>
+		</link>
+		<link>
+			<name>src/core/os/FreeRTOS/event_groups.c</name>
+			<type>1</type>
+			<locationURI>FREERTOS_INSTALL_DIR/FreeRTOS/Source/event_groups.c</locationURI>
+		</link>
+		<link>
+			<name>src/core/os/FreeRTOS/list.c</name>
+			<type>1</type>
+			<locationURI>FREERTOS_INSTALL_DIR/FreeRTOS/Source/list.c</locationURI>
+		</link>
+		<link>
+			<name>src/core/os/FreeRTOS/queue.c</name>
+			<type>1</type>
+			<locationURI>FREERTOS_INSTALL_DIR/FreeRTOS/Source/queue.c</locationURI>
+		</link>
+		<link>
+			<name>src/core/os/FreeRTOS/startup_ccs.c</name>
+			<type>1</type>
+			<locationURI>CC3200_SDK_DIR/example/common/startup_ccs.c</locationURI>
+		</link>
+		<link>
+			<name>src/core/os/FreeRTOS/stream_buffer.c</name>
+			<type>1</type>
+			<locationURI>FREERTOS_INSTALL_DIR/FreeRTOS/Source/stream_buffer.c</locationURI>
+		</link>
+		<link>
+			<name>src/core/os/FreeRTOS/tasks.c</name>
+			<type>1</type>
+			<locationURI>FREERTOS_INSTALL_DIR/FreeRTOS/Source/tasks.c</locationURI>
+		</link>
+		<link>
+			<name>src/core/os/FreeRTOS/timers.c</name>
+			<type>1</type>
+			<locationURI>FREERTOS_INSTALL_DIR/FreeRTOS/Source/timers.c</locationURI>
+		</link>
+		<link>
+			<name>src/core/os/FreeRTOS/port/ARM_CM3</name>
+			<type>2</type>
+			<locationURI>FREERTOS_INSTALL_DIR/FreeRTOS/Source/portable/CCS/ARM_CM3</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

@@ -29,7 +29,7 @@ const gpio_hal_cfg_t gpio_hal_conf[GPIO_TOTAL_PIN] =
   { DEBUG_LED,  PIN_64, GPIO_DIR_MODE_OUT,   PIN_TYPE_STD, GPIO_HAL_VAL_TRUE}
 };
 
-const gpio_hal_cfg_t * const Gpio_hal_conf_get(void)
+const gpio_hal_cfg_t*  Gpio_hal_conf_get(void)
 {
     return (gpio_hal_conf/*[0]*/);
 }
