@@ -27,6 +27,7 @@
 #endif
 
 const gpio_hal_cfg_t*  gpio_prova_conf;
+const clk_hal_conf_t*  clock_prova_conf;
 const timer_hal_conf_t* timer_prova_conf;
 const timer_hal_oc_conf_t* oc_prova_conf;
 const timer_hal_pwm_conf_t* pwm_prova_conf;
@@ -36,10 +37,10 @@ void prova_isr_app(timer_hal_irq_src_t timer)
 	if (timer == TIMER_HAL_CH1) // livello applicativo, puo avere qualisasi nome
 	{
 
-		Gpio_hal_set_value(DEBUG_LED, GPIO_LOW);  // stesso per gpio, puo avere qualisasi nome
+		Gpio_hal_write_value(DEBUG_LED, GPIO_HAL_VAL_FALSE, GPIO_HAL_MASK_AND_UNUSED);  // stesso per gpio, puo avere qualisasi nome
 
 		Timer_hal_OC_period(OC_CHANNEL_TEST_1, (uint16_t)(Timer_hal_OC_get(OC_CHANNEL_TEST_1)+8500));
-		Gpio_hal_set_value(DEBUG_LED, GPIO_HIGH);
+		Gpio_hal_write_value(DEBUG_LED, GPIO_HAL_VAL_TRUE, GPIO_HAL_MASK_AND_UNUSED);
 	}
 	else
 	{
@@ -51,16 +52,17 @@ void prova_isr_app(timer_hal_irq_src_t timer)
 int main(void)
 {
     gpio_prova_conf = Gpio_hal_conf_get();
+    clock_prova_conf = Clock_hal_conf_get();
 	// prepare the eventual additiona HAL layers
 	Core_hal_init();
 	// clock
-	Clock_hal_init();
+	Clock_hal_init(clock_prova_conf);
 	// interrupt systeme
 	IntHal_vector_init();
 
 	Gpio_hal_init(gpio_prova_conf);
-	Gpio_hal_set_value(DEBUG_LED, GPIO_HIGH);
-	Gpio_hal_set_value(DEBUG_LED, GPIO_LOW);
+	Gpio_hal_write_value(DEBUG_LED, GPIO_HAL_VAL_TRUE, GPIO_HAL_MASK_AND_UNUSED);
+	Gpio_hal_write_value(DEBUG_LED, GPIO_HAL_VAL_FALSE, GPIO_HAL_MASK_AND_UNUSED);
 	// Clock_hal_clk_out(RCC_MCO1SOURCE_HSI); // debug - not HAL compliant
 
 	// //tmr start

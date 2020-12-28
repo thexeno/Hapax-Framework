@@ -41,12 +41,12 @@
 									<listOptionValue builtIn="false" value="STM32F103C8Tx"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths.957969350" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/core_template/Src/core/portable/hal/stm32f103c8tx}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/core_template/Src/core}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/core_template/Drivers/STM32F1xx_HAL_Driver/Inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/core_template/Src/core/utils}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/core_template/Drivers/CMSIS/Device/ST/STM32F1xx/Include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/core_template/Drivers/CMSIS/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/core_template/Drivers/CMSIS/Device/ST/STM32F1xx/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/core_template/Drivers/STM32F1xx_HAL_Driver/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/core_template/Src/core}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/core_template/Src/core/utils}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/core_template/Src/core/portable/hal/stm32f103c8tx}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/core_template/Src/core/portable/hal/stm32f103c8tx/wrappers}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1387747038" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
@@ -78,7 +78,7 @@
 					<sourceEntries>
 						<entry excluding="Drivers|Src|Startup" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Drivers"/>
-						<entry excluding="core/portable/hal/stm32f103c8tx/clock_hal.c|core/portable/hal/stm32f103c8tx/gpio_hal.c|core/portable/hal/stm32f103c8tx/interrupt_hal.c|core/portable/hal/stm32f103c8tx/hal.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>
+						<entry excluding="core/libs/serial.c|core/portable/hal/stm32f103c8tx/wrappers/spi_hal.c|core/portable/hal/stm32f103c8tx/clock_hal.c|core/portable/hal/stm32f103c8tx/gpio_hal.c|core/portable/hal/stm32f103c8tx/interrupt_hal.c|core/portable/hal/stm32f103c8tx/hal.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Startup"/>
 					</sourceEntries>
 				</configuration>
@@ -159,7 +159,7 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Inc"/>
-						<entry excluding="core/portable/hal/stm32f103c8tx/clock_hal.c|core/portable/hal/stm32f103c8tx/gpio_hal.c|core/portable/hal/stm32f103c8tx/interrupt_hal.c|core/portable/hal/stm32f103c8tx/hal.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>
+						<entry excluding="core/libs/serial.c|core/portable/hal/stm32f103c8tx/wrappers/spi_hal.c|core/portable/hal/stm32f103c8tx/clock_hal.c|core/portable/hal/stm32f103c8tx/gpio_hal.c|core/portable/hal/stm32f103c8tx/interrupt_hal.c|core/portable/hal/stm32f103c8tx/hal.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Startup"/>
 					</sourceEntries>
 				</configuration>
@@ -181,5 +181,12 @@
 			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/core_template"/>
+		</configuration>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/core_template"/>
+		</configuration>
+	</storageModule>
 </cproject>

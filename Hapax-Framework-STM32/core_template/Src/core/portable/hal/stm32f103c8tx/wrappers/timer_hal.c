@@ -327,7 +327,7 @@ void Timer_hal_OC_start(conf_oc_e oc)
         {
             if (j > TIMER_TOTAL_INSTANCE)
             {
-                timer_hal_err_t *ret;          // for compliance
+                timer_hal_err_t ret;          // for compliance
                 timer_hal_error_handler(&ret); // for further error implementation
             }
             j++;
@@ -347,7 +347,7 @@ uint32_t Timer_hal_OC_get(conf_oc_e oc)
     {
         if (i > CONF_OC_ENUM_UNUSED)
         {
-            timer_hal_err_t *ret;          // for compliance
+            timer_hal_err_t ret;          // for compliance
             timer_hal_error_handler(&ret); // for further error implementation
         }
         i++;
@@ -359,7 +359,7 @@ uint32_t Timer_hal_OC_get(conf_oc_e oc)
     {
         if (j > CONF_TIMER_ENUM_UNUSED)
         {
-            timer_hal_err_t *ret;          // for compliance
+            timer_hal_err_t ret;          // for compliance
             timer_hal_error_handler(&ret); // for further error implementation
         }
         j++;
@@ -375,7 +375,7 @@ void Timer_hal_OC_period(conf_oc_e oc, uint32_t val)
         {
             if (i > CONF_OC_ENUM_UNUSED)
             {
-                timer_hal_err_t *ret;          // for compliance
+                timer_hal_err_t ret;          // for compliance
                 timer_hal_error_handler(&ret); // for further error implementation
             }
             i++;
@@ -387,7 +387,7 @@ void Timer_hal_OC_period(conf_oc_e oc, uint32_t val)
         {
             if (j > CONF_TIMER_ENUM_UNUSED)
             {
-                timer_hal_err_t *ret;          // for compliance
+                timer_hal_err_t ret;          // for compliance
                 timer_hal_error_handler(&ret); // for further error implementation
             }
             j++;
@@ -453,7 +453,7 @@ void Timer_hal_PWM_start(conf_pwm_e pwm)
         {
             if (j > TIMER_TOTAL_INSTANCE)
             {
-                timer_hal_err_t *ret;          // for compliance
+                timer_hal_err_t ret;          // for compliance
                 timer_hal_error_handler(&ret); // for further error implementation
             }
             j++;
@@ -474,7 +474,7 @@ void Timer_hal_PWM_DC(conf_pwm_e oc, uint32_t val)
         {
             if (i > CONF_PWM_ENUM_UNUSED)
             {
-                timer_hal_err_t *ret;          // for compliance
+                timer_hal_err_t ret;          // for compliance
                 timer_hal_error_handler(&ret); // for further error implementation
             }
             i++;
@@ -486,7 +486,7 @@ void Timer_hal_PWM_DC(conf_pwm_e oc, uint32_t val)
         {
             if (j > CONF_TIMER_ENUM_UNUSED)
             {
-                timer_hal_err_t *ret;          // for compliance
+                timer_hal_err_t ret;          // for compliance
                 timer_hal_error_handler(&ret); // for further error implementation
             }
             j++;

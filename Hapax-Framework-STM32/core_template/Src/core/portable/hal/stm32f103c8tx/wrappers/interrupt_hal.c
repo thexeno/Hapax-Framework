@@ -1,7 +1,7 @@
-#include <wrappers/hal.h>
-#include <wrappers/interrupt_hal.h>
+#include "hal.h"
+#include "interrupt_hal.h"
 
-#define INTERRUPT_MAX_SUPPORTED_ISR 26U
+#define INTERRUPT_MAX_SUPPORTED_ISR INT_HAL_TOTAL_ISR
 typedef void (*isr_pt_t)(void);
 
 
@@ -104,6 +104,11 @@ void I2C1_ER_IRQHandler(void)
 void TIM4_IRQHandler(void)
 {
   isr_pt_array[TIM4_IRQHandler_num].isr_pt();
+}
+
+void RCC_IRQHandler(void)
+{
+  isr_pt_array[RCC_IRQHandler_num].isr_pt();
 }
 
 /******************************************************************************/

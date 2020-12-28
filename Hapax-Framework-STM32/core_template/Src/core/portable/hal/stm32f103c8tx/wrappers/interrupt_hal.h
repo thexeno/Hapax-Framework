@@ -1,7 +1,8 @@
 #ifndef INTERRUPT_HAL_H
 #define INTERRUPT_HAL_H
 
-#include <sys_types.h>
+#include "sys_types.h"
+#include "conf.h"
 
 typedef enum
 {
@@ -11,6 +12,7 @@ typedef enum
     TIM3_IRQHandler_num,
     TIM2_IRQHandler_num,
     TIM1_IRQHandler_num,
+    RCC_IRQHandler_num,
 	INT_HAL_TOTAL_ISR
 } int_hal_vect_num_t;
 

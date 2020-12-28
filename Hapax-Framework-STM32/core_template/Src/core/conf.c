@@ -3,13 +3,22 @@
 
 #include "gpio_hal.h"
 #include "timer_hal.h"
+#include "clock_hal.h"
 
 
 //#define LSE_VALUE
 
-// CPU configs
-#define CONF_CPU_FREQ     16000000UL
 
+const clk_hal_conf_t clk_hal_conf =
+{
+    //   hw pin,            pin mode,    hw port set,              after-init state,      additional options i.e.: pull modes
+    CONF_AHB_FREQ, CONF_APB1_FREQ, CONF_APB2_FREQ, CLK_HAL_SOURCE_HSI
+};
+
+const clk_hal_conf_t *  Clock_hal_conf_get(void)
+{
+    return (&clk_hal_conf);
+}
 
 /**********************************************************
  *                CONFIGURATION STRUCTURES                *
@@ -23,16 +32,17 @@
  * the HAL layers (or their wrappers) in the **portable** section.
  */
 
+
 // e questo ti obbliga anche a dichiarare  TUTTI i pin
 const gpio_hal_cfg_t gpio_hal_conf[GPIO_TOTAL_PIN] =
 {
     //   hw pin,            pin mode,    hw port set,              after-init state,      additional options i.e.: pull modes
-  { DEBUG_LED,                  GPIOC,     GPIO_PIN_13,          GPIO_MODE_OUTPUT_PP,    GPIO_PIN_SET,         GPIO_NOPULL}, 
-  { PWM_PIN,                    GPIOA,     GPIO_PIN_6,           GPIO_MODE_AF_PP,        GPIO_PIN_RESET,       GPIO_NOPULL},
-  { MCO_PIN,                    GPIOA,     GPIO_PIN_8,           GPIO_MODE_AF_PP,        GPIO_PIN_RESET,       GPIO_NOPULL},
-  { CONF_GPIO_ENUM_UNUSED,      GPIOB,     GPIO_PIN_9,           GPIO_MODE_AF_PP,        GPIO_PIN_RESET,       GPIO_NOPULL},
-  { CONF_GPIO_ENUM_UNUSED,      GPIOB,     GPIO_PIN_9,           GPIO_MODE_AF_PP,        GPIO_PIN_RESET,       GPIO_NOPULL},
-};
+  { DEBUG_LED,                  GPIO_HAL_PORTC,     GPIO_HAL_PIN_13,          GPIO_HAL_MODE_OUT,        GPIO_HAL_VAL_TRUE,  }, 
+  { PWM_PIN,                    GPIO_HAL_PORTA,     GPIO_HAL_PIN_6,           GPIO_HAL_MODE_MUX,        GPIO_HAL_VAL_FALSE},
+  { MCO_PIN,                    GPIO_HAL_PORTA,     GPIO_HAL_PIN_8,           GPIO_HAL_MODE_MUX,        GPIO_HAL_VAL_FALSE},
+  { CONF_GPIO_ENUM_UNUSED,      GPIO_HAL_PORTB,     GPIO_HAL_PIN_9,           GPIO_HAL_MODE_MUX,        GPIO_HAL_VAL_FALSE},
+  { CONF_GPIO_ENUM_UNUSED,      GPIO_HAL_PORTB,     GPIO_HAL_PIN_9,           GPIO_HAL_MODE_MUX,        GPIO_HAL_VAL_FALSE},
+}; 
 
 const gpio_hal_cfg_t * const Gpio_hal_conf_get(void)
 {
@@ -78,17 +88,28 @@ const timer_hal_pwm_conf_t * const Timer_hal_PWM_conf_get(void)
 {
     return (pwm_test/*[0]*/);
 }
+base_t Timer_hal_PWM_conf_get_size(void)
+{
+    return (sizeof(pwm_test)/sizeof(pwm_test[0]));
+}
 
 const timer_hal_oc_conf_t * const Timer_hal_OC_conf_get(void)
 {
     return (oc_test/*[0]*/);
+}
+base_t Timer_hal_OC_conf_get_size(void)
+{
+    return (sizeof(oc_test)/sizeof(oc_test[0]));
 }
 
 const timer_hal_conf_t * const Timer_hal_conf_get(void)
 {
     return (timer_test/*[0]*/);
 }
-
+base_t Timer_hal_conf_get_size(void)
+{
+    return (sizeof(timer_test)/sizeof(timer_test[0]));
+}
 
 
 /*timer_hal_func_t timer_hal_test_conf[2] =

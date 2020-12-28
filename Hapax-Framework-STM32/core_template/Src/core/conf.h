@@ -45,4 +45,11 @@ typedef enum
 	CONF_SPI_ENUM_UNUSED
 } conf_spi_e;
 
+// CPU configs
+#define CONF_HSE_OSC    24000000UL
+#define CONF_LSE_OSC    32768UL
+#define CONF_AHB_FREQ      8000000UL
+#define CONF_APB1_FREQ     4000000UL
+#define CONF_APB2_FREQ     4000000UL
+
 #endif
