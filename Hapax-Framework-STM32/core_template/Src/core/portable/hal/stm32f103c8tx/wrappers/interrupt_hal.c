@@ -111,6 +111,16 @@ void RCC_IRQHandler(void)
   isr_pt_array[RCC_IRQHandler_num].isr_pt();
 }
 
+void SPI1_IRQHandler(void)
+{
+   isr_pt_array[SPI1_IRQHandler_num].isr_pt();
+}
+
+void SPI2_IRQHandler(void)
+{
+   isr_pt_array[SPI2_IRQHandler_num].isr_pt();
+}
+
 /******************************************************************************/
 /*           Cortex-M3 Processor Interruption and Exception Handlers          */ 
 /******************************************************************************/

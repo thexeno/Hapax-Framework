@@ -4,6 +4,7 @@
 #include "gpio_hal.h"
 #include "timer_hal.h"
 #include "clock_hal.h"
+#include "spi_hal.h"
 
 
 //#define LSE_VALUE
@@ -54,6 +55,21 @@ base_t Gpio_hal_conf_get_size(void)
     return (sizeof(gpio_hal_conf)/sizeof(gpio_hal_conf[0]));
 }
 
+const spi_hal_conf_t spi_hal_conf[SPI_TOTAL_INSTANCE] =
+{
+  { .spi = SPI_TEST_0,  .periph = SPI_HAL_1,     .mode = SPI_HAL_MODE_MASTER,    .baud = 100000, .dsize = SPI_HAL_WORD_8BIT,   
+    .cpha = SPI_HAL_PHA_1EDGE, .cpol = SPI_HAL_POL_IDLE_HIGH} 
+}; 
+
+const gpio_hal_cfg_t * const Gpio_hal_conf_get(void)
+{
+    return (gpio_hal_conf/*[0]*/);
+}
+
+base_t Gpio_hal_conf_get_size(void)
+{
+    return (sizeof(gpio_hal_conf)/sizeof(gpio_hal_conf[0]));
+}
 
 /*
     // Pin enumerator,  
