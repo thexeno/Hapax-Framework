@@ -28,25 +28,25 @@
 
 const gpio_hal_cfg_t*  gpio_prova_conf;
 const clk_hal_conf_t*  clock_prova_conf;
-const timer_hal_conf_t* timer_prova_conf;
-const timer_hal_oc_conf_t* oc_prova_conf;
-const timer_hal_pwm_conf_t* pwm_prova_conf;
-
-void prova_isr_app(timer_hal_irq_src_t timer)
-{
-	if (timer == TIMER_HAL_CH1) // livello applicativo, puo avere qualisasi nome
-	{
-
-		Gpio_hal_write_value(DEBUG_LED, GPIO_HAL_VAL_FALSE, GPIO_HAL_MASK_AND_UNUSED);  // stesso per gpio, puo avere qualisasi nome
-
-		Timer_hal_OC_period(OC_CHANNEL_TEST_1, (uint16_t)(Timer_hal_OC_get(OC_CHANNEL_TEST_1)+8500));
-		Gpio_hal_write_value(DEBUG_LED, GPIO_HAL_VAL_TRUE, GPIO_HAL_MASK_AND_UNUSED);
-	}
-	else
-	{
-		asm("nop");
-	}
-}
+//const timer_hal_conf_t* timer_prova_conf;
+//const timer_hal_oc_conf_t* oc_prova_conf;
+//const timer_hal_pwm_conf_t* pwm_prova_conf;
+//
+//void prova_isr_app(timer_hal_irq_src_t timer)
+//{
+//	if (timer == TIMER_HAL_CH1) // livello applicativo, puo avere qualisasi nome
+//	{
+//
+//		Gpio_hal_write_value(DEBUG_LED, GPIO_HAL_VAL_FALSE, GPIO_HAL_MASK_AND_UNUSED);  // stesso per gpio, puo avere qualisasi nome
+//
+//		Timer_hal_OC_period(OC_CHANNEL_TEST_1, (uint16_t)(Timer_hal_OC_get(OC_CHANNEL_TEST_1)+8500));
+//		Gpio_hal_write_value(DEBUG_LED, GPIO_HAL_VAL_TRUE, GPIO_HAL_MASK_AND_UNUSED);
+//	}
+//	else
+//	{
+//		asm("nop");
+//	}
+//}
 
 
 int main(void)
@@ -65,30 +65,30 @@ int main(void)
 	Gpio_hal_write_value(DEBUG_LED, GPIO_HAL_VAL_FALSE, GPIO_HAL_MASK_AND_UNUSED);
 	// Clock_hal_clk_out(RCC_MCO1SOURCE_HSI); // debug - not HAL compliant
 
-	// //tmr start
-    timer_prova_conf = Timer_hal_conf_get();
-    oc_prova_conf = Timer_hal_OC_conf_get();
-	Timer_hal_init(timer_prova_conf);
-	Timer_hal_set_ISR_cb(TIMER_4, prova_isr_app);
-	Timer_hal_OC_init(oc_prova_conf);
-	Timer_hal_OC_period(OC_CHANNEL_TEST_1, 0xff55);
-
-	IntHal_enable_global_interrupt();
-	Timer_hal_OC_start(OC_CHANNEL_TEST_1);
-	// //pwm
-    pwm_prova_conf = Timer_hal_PWM_conf_get();
-	Timer_hal_PWM_init(pwm_prova_conf);
-	// Timer_hal_PWM_start(&timer_hal_test_conf[0]);
-	Timer_hal_PWM_DC(PWM_CHANNEL_TEST_1, 95);
-	// // OC
-	// Timer_hal_OC_init(&timer_hal_test_conf[1]);
-	Timer_hal_PWM_start(PWM_CHANNEL_TEST_1);
-	// // one pulse
-	
-
-	//Timer_hal_OC_period(&timer_hal_test_conf[1], 1500);
-
-//int enable
+//	// //tmr start
+//    timer_prova_conf = Timer_hal_conf_get();
+//    oc_prova_conf = Timer_hal_OC_conf_get();
+//	Timer_hal_init(timer_prova_conf);
+//	Timer_hal_set_ISR_cb(TIMER_4, prova_isr_app);
+//	Timer_hal_OC_init(oc_prova_conf);
+//	Timer_hal_OC_period(OC_CHANNEL_TEST_1, 0xff55);
+//
+//	IntHal_enable_global_interrupt();
+//	Timer_hal_OC_start(OC_CHANNEL_TEST_1);
+//	// //pwm
+//    pwm_prova_conf = Timer_hal_PWM_conf_get();
+//	Timer_hal_PWM_init(pwm_prova_conf);
+//	// Timer_hal_PWM_start(&timer_hal_test_conf[0]);
+//	Timer_hal_PWM_DC(PWM_CHANNEL_TEST_1, 95);
+//	// // OC
+//	// Timer_hal_OC_init(&timer_hal_test_conf[1]);
+//	Timer_hal_PWM_start(PWM_CHANNEL_TEST_1);
+//	// // one pulse
+//
+//
+//	//Timer_hal_OC_period(&timer_hal_test_conf[1], 1500);
+//
+////int enable
 
 
 	for(;;);

@@ -13,6 +13,8 @@ typedef enum
     TIM2_IRQHandler_num,
     TIM1_IRQHandler_num,
     RCC_IRQHandler_num,
+	SPI1_IRQHandler_num,
+	SPI2_IRQHandler_num,
 	INT_HAL_TOTAL_ISR
 } int_hal_vect_num_t;
 

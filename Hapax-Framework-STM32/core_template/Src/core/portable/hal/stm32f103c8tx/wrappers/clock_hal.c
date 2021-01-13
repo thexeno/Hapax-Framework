@@ -17,7 +17,7 @@ clock_hal_err_t Clock_hal_init(const clk_hal_conf_t *handle)
 
     /** Initializes the CPU, AHB and APB busses clocks   */
     RCC_OscInitStruct.OscillatorType = handle->source;
-    if (handle->source == CLK_HAL_SOURCE_HSI)
+    if (handle->source == RCC_OSCILLATORTYPE_HSI)
     {
         RCC_OscInitStruct.HSIState = RCC_HSI_ON;
         RCC_OscInitStruct.HSEState = RCC_HSE_OFF;

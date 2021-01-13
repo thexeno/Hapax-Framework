@@ -10,10 +10,10 @@
 //#define LSE_VALUE
 
 
-const clk_hal_conf_t clk_hal_conf =
+clk_hal_conf_t clk_hal_conf =
 {
     //   hw pin,            pin mode,    hw port set,              after-init state,      additional options i.e.: pull modes
-    CONF_AHB_FREQ, CONF_APB1_FREQ, CONF_APB2_FREQ, CLK_HAL_SOURCE_HSI
+    CONF_AHB_FREQ, CONF_APB1_FREQ, CONF_APB2_FREQ, RCC_OSCILLATORTYPE_HSI
 };
 
 const clk_hal_conf_t *  Clock_hal_conf_get(void)
@@ -37,12 +37,11 @@ const clk_hal_conf_t *  Clock_hal_conf_get(void)
 // e questo ti obbliga anche a dichiarare  TUTTI i pin
 const gpio_hal_cfg_t gpio_hal_conf[GPIO_TOTAL_PIN] =
 {
-    //   hw pin,            pin mode,    hw port set,              after-init state,      additional options i.e.: pull modes
-  { DEBUG_LED,                  GPIO_HAL_PORTC,     GPIO_HAL_PIN_13,          GPIO_HAL_MODE_OUT,        GPIO_HAL_VAL_TRUE,  }, 
-  { PWM_PIN,                    GPIO_HAL_PORTA,     GPIO_HAL_PIN_6,           GPIO_HAL_MODE_MUX,        GPIO_HAL_VAL_FALSE},
-  { MCO_PIN,                    GPIO_HAL_PORTA,     GPIO_HAL_PIN_8,           GPIO_HAL_MODE_MUX,        GPIO_HAL_VAL_FALSE},
-  { CONF_GPIO_ENUM_UNUSED,      GPIO_HAL_PORTB,     GPIO_HAL_PIN_9,           GPIO_HAL_MODE_MUX,        GPIO_HAL_VAL_FALSE},
-  { CONF_GPIO_ENUM_UNUSED,      GPIO_HAL_PORTB,     GPIO_HAL_PIN_9,           GPIO_HAL_MODE_MUX,        GPIO_HAL_VAL_FALSE},
+  { .pin = DEBUG_LED,       .port = GPIO_HAL_PORTC,   .pin =  GPIO_HAL_PIN_13,  .mode_io = GPIO_HAL_MODE_OUT,   .val = GPIO_HAL_VAL_TRUE },
+  { .pin = PWM_PIN,                    .port = GPIO_HAL_PORTA,    .pin =   GPIO_HAL_PIN_6,          .mode_io =  GPIO_HAL_MODE_MUX,      .val =   GPIO_HAL_VAL_FALSE},
+  { .pin = MCO_PIN,                    .port = GPIO_HAL_PORTA,    .pin =   GPIO_HAL_PIN_8,          .mode_io =  GPIO_HAL_MODE_MUX,       .val =  GPIO_HAL_VAL_FALSE},
+  { .pin = CONF_GPIO_ENUM_UNUSED,      .port = GPIO_HAL_PORTB,     .pin =  GPIO_HAL_PIN_9,          .mode_io =  GPIO_HAL_MODE_MUX,       .val =  GPIO_HAL_VAL_FALSE},
+  { .pin = CONF_GPIO_ENUM_UNUSED,      .port = GPIO_HAL_PORTB,    .pin =   GPIO_HAL_PIN_9,          .mode_io =  GPIO_HAL_MODE_MUX,       .val =  GPIO_HAL_VAL_FALSE}
 }; 
 
 const gpio_hal_cfg_t * const Gpio_hal_conf_get(void)
@@ -57,18 +56,18 @@ base_t Gpio_hal_conf_get_size(void)
 
 const spi_hal_conf_t spi_hal_conf[SPI_TOTAL_INSTANCE] =
 {
-  { .spi = SPI_TEST_0,  .periph = SPI_HAL_1,     .mode = SPI_HAL_MODE_MASTER,    .baud = 100000, .dsize = SPI_HAL_WORD_8BIT,   
+  { .spi = SPI_TEST_0,  .periph = SPI_HAL_1,  .status = SPI_HAL_ERR_OK,   .mode = SPI_HAL_MODE_MASTER,    .baud = 100000, .dsize = SPI_HAL_WORD_8BIT,
     .cpha = SPI_HAL_PHA_1EDGE, .cpol = SPI_HAL_POL_IDLE_HIGH} 
 }; 
 
-const gpio_hal_cfg_t * const Gpio_hal_conf_get(void)
+const spi_hal_conf_t * const Spi_hal_conf_get(void)
 {
-    return (gpio_hal_conf/*[0]*/);
+    return (spi_hal_conf/*[0]*/);
 }
 
-base_t Gpio_hal_conf_get_size(void)
+const base_t Spi_hal_conf_get_size(void)
 {
-    return (sizeof(gpio_hal_conf)/sizeof(gpio_hal_conf[0]));
+    return (sizeof(spi_hal_conf)/sizeof(spi_hal_conf[0]));
 }
 
 /*
@@ -104,6 +103,7 @@ const timer_hal_pwm_conf_t * const Timer_hal_PWM_conf_get(void)
 {
     return (pwm_test/*[0]*/);
 }
+
 base_t Timer_hal_PWM_conf_get_size(void)
 {
     return (sizeof(pwm_test)/sizeof(pwm_test[0]));
@@ -122,6 +122,7 @@ const timer_hal_conf_t * const Timer_hal_conf_get(void)
 {
     return (timer_test/*[0]*/);
 }
+
 base_t Timer_hal_conf_get_size(void)
 {
     return (sizeof(timer_test)/sizeof(timer_test[0]));

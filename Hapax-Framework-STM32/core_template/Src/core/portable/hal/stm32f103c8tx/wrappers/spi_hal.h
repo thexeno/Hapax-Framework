@@ -12,6 +12,8 @@
 /* Typedef to locally define peripheral address from the CMSIS available for the ARM part */
 typedef SPI_TypeDef* spi_hal_periph_t;
 
+typedef uint32_t spi_hal_baud_t;
+
 /* Typedef to locally define modes from the CMSIS available for the ARM part, allowing not change in the configuration when changing part */
 typedef enum  
 {
@@ -19,7 +21,7 @@ typedef enum
     SPI_HAL_MODE_SLAVE = SPI_MODE_MASTER
 } spi_hal_mode_t;
 
-/* Definition scheme to bring peripheral address from the CMSIS to the HAL of the ARM part, allowing not change in the configuration when changing part */ */
+/* Definition scheme to bring peripheral address from the CMSIS to the HAL of the ARM part, allowing not change in the configuration when changing part */
 #define SPI_HAL_1 ((spi_hal_periph_t)SPI1)
 #define SPI_HAL_2 ((spi_hal_periph_t)SPI2)
 
@@ -31,7 +33,7 @@ typedef enum
 {
     SPI_HAL_WORD_8BIT = SPI_DATASIZE_8BIT,
     SPI_HAL_WORD_16BIT = SPI_DATASIZE_16BIT
-} spi_hal_mode_t;
+} spi_hal_word_t;
 
 /* Types of error states for internal usage and application check */
 typedef enum
@@ -55,14 +57,14 @@ typedef enum
 {
 	SPI_HAL_PHA_1EDGE = SPI_PHASE_1EDGE,
 	SPI_HAL_PHA_2EDGE = SPI_PHASE_2EDGE
-} spi_hal_pha_t;
+} spi_hal_cpha_t;
 
 /* Polarity options, typedef for allowing no change in the configuration when changing part */
 typedef enum
 {
 	SPI_HAL_POL_IDLE_LOW = SPI_POLARITY_LOW,
 	SPI_HAL_POL_IDLE_HIGH = SPI_POLARITY_HIGH
-} spi_hal_pol_t;
+} spi_hal_cpol_t;
 
 /* Types of possible IRQ sources from the SPI to be used in the callback definition at the application level */
 typedef enum {
@@ -81,24 +83,15 @@ typedef struct
     spi_hal_periph_t periph;  // Peripheral redeclared here to shell the part specific HW
     spi_hal_err_t status; // init at OK
     spi_hal_mode_t mode; 
-    uint32_t baud;
+    spi_hal_baud_t baud;
     spi_hal_word_t dsize;
     spi_hal_cpha_t cpha;
     spi_hal_cpol_t cpol;
 } spi_hal_conf_t;
 
-typedef struct
-{
-    conf_spi_e spi; //for indexing the already partially configurated SPI module
-    spi_hal_baud_t baud;
-    spi_hal_pha_t pha;
-    spi_hal_pol_t pol;
-    spi_hal_ss_cb_t ss_cb;
-} spi_hal_xfer_t;
-
 // Initialisation functions
 spi_hal_err_t Spi_hal_init(const spi_hal_conf_t *handle);
-spi_hal_err_t Spi_hal_xfer_start(spi_hal_xfer_t )
+spi_hal_err_t Spi_hal_init_transfer(conf_spi_e spi, uint32_t txd, spi_hal_handle_t* handle);
 
 
 void Spi_hal_set_ISR_cb(conf_spi_e tmr, void (*f_pt)(timer_hal_irq_src_t));
