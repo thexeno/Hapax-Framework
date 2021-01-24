@@ -2,6 +2,7 @@
 #ifndef SPI_HAL_H
 #define SPI_HAL_H
 
+#include "hal.h"
 #include "sys_types.h"
 #include "conf.h"
 
@@ -90,8 +91,9 @@ typedef struct
 } spi_hal_conf_t;
 
 // Initialisation functions
-spi_hal_err_t Spi_hal_init(const spi_hal_conf_t *handle);
-spi_hal_err_t Spi_hal_init_transfer(conf_spi_e spi, uint32_t txd, spi_hal_handle_t* handle);
+spi_hal_err_t Spi_hal_init(spi_hal_conf_t *handle);
+spi_hal_err_t Spi_hal_init_transfer(conf_spi_e spi, uint32_t txd, spi_hal_handle_t *handle);
+spi_hal_err_t Spi_hal_ISR_callback_set(conf_spi_e spi, spi_hal_isr_t isr_type, void (*fp_t)(conf_spi_e));
 
 
 void Spi_hal_set_ISR_cb(conf_spi_e tmr, void (*f_pt)(timer_hal_irq_src_t));

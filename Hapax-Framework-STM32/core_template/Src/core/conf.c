@@ -37,11 +37,11 @@ const clk_hal_conf_t *  Clock_hal_conf_get(void)
 // e questo ti obbliga anche a dichiarare  TUTTI i pin
 const gpio_hal_cfg_t gpio_hal_conf[GPIO_TOTAL_PIN] =
 {
-  { .pin = DEBUG_LED,       .port = GPIO_HAL_PORTC,   .pin =  GPIO_HAL_PIN_13,  .mode_io = GPIO_HAL_MODE_OUT,   .val = GPIO_HAL_VAL_TRUE },
-  { .pin = PWM_PIN,                    .port = GPIO_HAL_PORTA,    .pin =   GPIO_HAL_PIN_6,          .mode_io =  GPIO_HAL_MODE_MUX,      .val =   GPIO_HAL_VAL_FALSE},
-  { .pin = MCO_PIN,                    .port = GPIO_HAL_PORTA,    .pin =   GPIO_HAL_PIN_8,          .mode_io =  GPIO_HAL_MODE_MUX,       .val =  GPIO_HAL_VAL_FALSE},
-  { .pin = CONF_GPIO_ENUM_UNUSED,      .port = GPIO_HAL_PORTB,     .pin =  GPIO_HAL_PIN_9,          .mode_io =  GPIO_HAL_MODE_MUX,       .val =  GPIO_HAL_VAL_FALSE},
-  { .pin = CONF_GPIO_ENUM_UNUSED,      .port = GPIO_HAL_PORTB,    .pin =   GPIO_HAL_PIN_9,          .mode_io =  GPIO_HAL_MODE_MUX,       .val =  GPIO_HAL_VAL_FALSE}
+  { .pin = DEBUG_LED,                  .port = GPIO_HAL_PORTC,    .pin =  GPIO_HAL_PIN_13,      .mode_io = GPIO_HAL_MODE_OUT,        .val = GPIO_HAL_VAL_TRUE },
+  { .pin = PWM_PIN,                    .port = GPIO_HAL_PORTA,    .pin =   GPIO_HAL_PIN_6,      .mode_io =  GPIO_HAL_MODE_MUX,       .val =   GPIO_HAL_VAL_FALSE},
+  { .pin = MCO_PIN,                    .port = GPIO_HAL_PORTA,    .pin =   GPIO_HAL_PIN_8,      .mode_io =  GPIO_HAL_MODE_MUX,       .val =  GPIO_HAL_VAL_FALSE},
+  { .pin = CONF_GPIO_ENUM_UNUSED,      .port = GPIO_HAL_PORTB,    .pin =  GPIO_HAL_PIN_9,       .mode_io =  GPIO_HAL_MODE_MUX,       .val =  GPIO_HAL_VAL_FALSE},
+  { .pin = CONF_GPIO_ENUM_UNUSED,      .port = GPIO_HAL_PORTB,    .pin =   GPIO_HAL_PIN_9,      .mode_io =  GPIO_HAL_MODE_MUX,       .val =  GPIO_HAL_VAL_FALSE}
 }; 
 
 const gpio_hal_cfg_t * const Gpio_hal_conf_get(void)
@@ -54,7 +54,7 @@ base_t Gpio_hal_conf_get_size(void)
     return (sizeof(gpio_hal_conf)/sizeof(gpio_hal_conf[0]));
 }
 
-const spi_hal_conf_t spi_hal_conf[SPI_TOTAL_INSTANCE] =
+spi_hal_conf_t spi_hal_conf[SPI_TOTAL_INSTANCE] =
 {
   { .spi = SPI_TEST_0,  .periph = SPI_HAL_1,  .status = SPI_HAL_ERR_OK,   .mode = SPI_HAL_MODE_MASTER,    .baud = 100000, .dsize = SPI_HAL_WORD_8BIT,
     .cpha = SPI_HAL_PHA_1EDGE, .cpol = SPI_HAL_POL_IDLE_HIGH} 

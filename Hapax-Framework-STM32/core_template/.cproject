@@ -79,7 +79,7 @@
 					<sourceEntries>
 						<entry excluding="Drivers|Src|Startup" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Drivers"/>
-						<entry excluding="core/portable/hal/stm32f103c8tx/wrappers/timer_hal.c|core/libs/serial.c|core/portable/hal/stm32f103c8tx/wrappers/spi_hal.c|core/portable/hal/stm32f103c8tx/clock_hal.c|core/portable/hal/stm32f103c8tx/gpio_hal.c|core/portable/hal/stm32f103c8tx/interrupt_hal.c|core/portable/hal/stm32f103c8tx/hal.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>
+						<entry excluding="core/portable/hal/stm32f103c8tx/wrappers/timer_hal.c|core/libs/serial.c|core/portable/hal/stm32f103c8tx/clock_hal.c|core/portable/hal/stm32f103c8tx/gpio_hal.c|core/portable/hal/stm32f103c8tx/interrupt_hal.c|core/portable/hal/stm32f103c8tx/hal.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Startup"/>
 					</sourceEntries>
 				</configuration>
@@ -161,7 +161,7 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Inc"/>
-						<entry excluding="core/portable/hal/stm32f103c8tx/wrappers/timer_hal.c|core/libs/serial.c|core/portable/hal/stm32f103c8tx/wrappers/spi_hal.c|core/portable/hal/stm32f103c8tx/clock_hal.c|core/portable/hal/stm32f103c8tx/gpio_hal.c|core/portable/hal/stm32f103c8tx/interrupt_hal.c|core/portable/hal/stm32f103c8tx/hal.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>
+						<entry excluding="core/portable/hal/stm32f103c8tx/wrappers/timer_hal.c|core/libs/serial.c|core/portable/hal/stm32f103c8tx/clock_hal.c|core/portable/hal/stm32f103c8tx/gpio_hal.c|core/portable/hal/stm32f103c8tx/interrupt_hal.c|core/portable/hal/stm32f103c8tx/hal.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Startup"/>
 					</sourceEntries>
 				</configuration>

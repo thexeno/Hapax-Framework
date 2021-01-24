@@ -21,6 +21,7 @@
 #include "gpio_hal.h"
 #include "timer_hal.h"
 #include "clock_hal.h"
+#include "spi_hal.h"
 #include "interrupt_hal.h"
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
@@ -28,6 +29,11 @@
 
 const gpio_hal_cfg_t*  gpio_prova_conf;
 const clk_hal_conf_t*  clock_prova_conf;
+const spi_hal_conf_t*	spi_prova;
+spi_hal_handle_t spi_mydata_transaction;
+
+uint8_t buff[10];
+
 //const timer_hal_conf_t* timer_prova_conf;
 //const timer_hal_oc_conf_t* oc_prova_conf;
 //const timer_hal_pwm_conf_t* pwm_prova_conf;
@@ -48,11 +54,25 @@ const clk_hal_conf_t*  clock_prova_conf;
 //	}
 //}
 
+void prova_isr_spi(conf_spi_e spi)
+{
+	uint8_t local = 0xAB;
+	if (spi == SPI_TEST_0)
+	{
+		Spi_hal_transfer(spi_mydata_transaction, buff[1], &local);
+	}
+}
 
 int main(void)
 {
+	int i = 0;
+	for (i = 0; i < 10; i++)
+	{
+		buff[i] = 0xAA;
+	}
     gpio_prova_conf = Gpio_hal_conf_get();
     clock_prova_conf = Clock_hal_conf_get();
+	spi_prova = Spi_hal_conf_get();
 	// prepare the eventual additiona HAL layers
 	Core_hal_init();
 	// clock
@@ -90,6 +110,10 @@ int main(void)
 //
 ////int enable
 
-
+	Spi_hal_init(spi_prova);
+	Spi_hal_ISR_callback_set(SPI_TEST_0, SPI_HAL_ISR_T_TXE, prova_isr_spi);
+	Spi_hal_init_transfer(SPI_TEST_0, (uint32_t)buff[0], spi_mydata_transaction);
 	for(;;);
 }
+
+

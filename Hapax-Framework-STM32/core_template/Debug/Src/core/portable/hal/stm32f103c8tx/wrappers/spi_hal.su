@@ -1,0 +1,7 @@
+spi_hal.c:21:13:spi_hal_cb_default	16	static
+spi_hal.c:28:13:spi_hal_spi2_isr	8	static
+spi_hal.c:48:13:spi_hal_spi1_isr	8	static
+spi_hal.c:68:15:Spi_hal_ISR_callback_set	24	static
+spi_hal.c:102:19:Spi_hal_init	32	static
+spi_hal.c:212:19:Spi_hal_init_transfer	32	static
+spi_hal.c:238:19:Spi_hal_transfer	24	static
