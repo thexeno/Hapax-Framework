@@ -1,5 +1,0 @@
-conf.c:37:30:Gpio_hal_conf_get	4	static
-conf.c:42:8:Gpio_hal_conf_get_size	4	static
-conf.c:77:36:Timer_hal_PWM_conf_get	4	static
-conf.c:82:35:Timer_hal_OC_conf_get	4	static
-conf.c:87:32:Timer_hal_conf_get	4	static

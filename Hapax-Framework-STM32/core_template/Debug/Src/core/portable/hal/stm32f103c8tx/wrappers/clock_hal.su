@@ -1,3 +1,0 @@
-clock_hal.c:3:15:Clock_hal_init	88	static
-clock_hal.c:41:6:Clock_hal_clk_out	16	static
-clock_hal.c:47:10:Clock_hal_get_info	24	static

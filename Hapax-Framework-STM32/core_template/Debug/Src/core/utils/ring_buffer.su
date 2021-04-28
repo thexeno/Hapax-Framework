@@ -1,9 +1,0 @@
-ring_buffer.c:9:6:Rb_init	24	static
-ring_buffer.c:21:7:Rb_is_empty	16	static
-ring_buffer.c:34:10:Rb_used_size	24	static
-ring_buffer.c:49:10:Rb_available_size	24	static
-ring_buffer.c:65:7:Rb_is_full	16	static
-ring_buffer.c:87:6:Rb_retrieve_char	24	static
-ring_buffer.c:111:8:Rb_put_char	16	static
-ring_buffer.c:132:8:Rb_put_buff	24	static
-ring_buffer.c:146:8:Rb_put_integer	40	static

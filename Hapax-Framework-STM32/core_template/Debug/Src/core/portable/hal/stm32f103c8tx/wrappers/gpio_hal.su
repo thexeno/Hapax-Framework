@@ -1,6 +1,0 @@
-gpio_hal.c:8:16:Gpio_hal_set_mode	40	static
-gpio_hal.c:32:16:Gpio_hal_set_value	24	static
-gpio_hal.c:50:16:Gpio_hal_get_value	24	static
-gpio_hal.c:70:6:Gpio_hal_parallel_set_val	16	static
-gpio_hal.c:75:8:Gpio_hal_parallel_get_val	16	static
-gpio_hal.c:81:6:Gpio_hal_init	56	static
